@@ -8,7 +8,9 @@ __pycache__
 *.so
 
 # Distribution / packaging
+dist/
 build/
+*.egg-info/
 
 # Sphinx documentation
 docs/_build/
