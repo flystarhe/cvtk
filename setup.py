@@ -1,16 +1,33 @@
 from setuptools import setup, find_packages
 from pathlib import Path
+import re
 
 
 here = Path(__file__).parent.resolve()
-version = (here / "version.txt").read_text(encoding="utf-8")
+with open(here / "cvtk/__init__.py", "r") as fh:
+    version = re.search(r"__version__ = \"(.*?)\"", fh.read()).group(1)
 long_description = (here / "readme.md").read_text(encoding="utf-8")
-install_requires = (here / "requirements.txt").read_text(encoding="utf-8").split()
+
+
+def parse_requirements(fpath):
+
+    def gen_packages_items():
+        with open(fpath, "r") as fh:
+            for line in fh.readlines():
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    yield line
+
+    packages = list(gen_packages_items())
+    return packages
+
+
+install_requires = parse_requirements(here / "requirements.txt")
 
 
 setup(
     name="cvtk",
-    version=version.strip(),
+    version=version,
     author="flystarhe",
     author_email="flystarhe@qq.com",
     keywords="computer vision, machine learning",
