@@ -8,7 +8,7 @@ from collections import defaultdict
 class RandomCrop(object):
 
     def __init__(self, height, width, **kw):
-        area = (height * width) * 0.3
+        area = (height * width) * 0.5
         self.nonignore = area
         self.height = height
         self.width = width
@@ -61,14 +61,14 @@ class RandomCrop(object):
         dst_area = dst_w * dst_h
 
         inner = (dst_w >= 4) * (dst_h >= 4) * (dst_area >= 48)
-        is_large = np.maximum(src_w, src_h) >= 96
-        is_small = np.logical_not(is_large)
+        x = np.clip(np.sqrt(src_area), 32, None)
+        x = 0.3 + 0.7 * 32 / x
 
-        s1 = is_small * (dst_area >= src_area)
-        s2 = is_large * (dst_area >= src_area * 0.5)
+        s1 = (dst_area >= src_area * x)
+        s2 = (dst_area >= self.nonignore)
         s3 = (dst_w >= src_w) * (dst_h >= src_w * 2.0)
         s4 = (dst_h >= src_h) * (dst_w >= src_h * 2.0)
-        ss = (dst_area >= self.nonignore) + s1 + s2 + s3 + s4
+        ss = s1 + s2 + s3 + s4
 
         return ss * inner, np.logical_not(ss) * inner
 
