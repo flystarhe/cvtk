@@ -6,6 +6,16 @@ from collections import defaultdict
 
 
 class RandomCrop(object):
+    """Crop a random part of the input.
+    Args:
+        height (int): height of the crop.
+        width (int): width of the crop.
+        p (float): probability.
+    Targets:
+        image, bboxes
+    Image types:
+        uint8,
+    """
 
     def __init__(self, height, width, **kw):
         area = (height * width) * 0.5
@@ -62,7 +72,7 @@ class RandomCrop(object):
 
         inner = (dst_w >= 4) * (dst_h >= 4) * (dst_area >= 48)
         x = np.clip(np.sqrt(src_area), 32, None)
-        x = 0.3 + 0.7 * 32 / x
+        x = 0.5 + 0.5 * 32 / x
 
         s1 = (dst_area >= src_area * x)
         s2 = (dst_area >= self.nonignore)
@@ -88,7 +98,7 @@ class RandomCrop(object):
 
             cx, cy = self.width // 2, self.height // 2
             x1, y1, x2, y2 = cx - 32, cy - 32, cx + 32, cy + 32
-            dst_img[y1: y2, x1: x2] = dst_img[y1: y2, x1: x2] + 100
+            dst_img[y1: y2, x1: x2] = dst_img[y1: y2, x1: x2] + 128
             dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)  # man-made object
             dst_labels = np.array([0], dtype=np.int64)  # set the man-made object category in 1st
 
