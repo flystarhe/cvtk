@@ -31,7 +31,7 @@ class KeepPSamplesIn(object):
         assert isinstance(p, (int, float)) and (p > 0)
         self.p = p
 
-    def split(self, coco_file):
+    def split(self, coco_file, stratified=True, seed=1000):
         coco = load_json(coco_file)
         out_dir = Path(coco_file).parent
         out_dir = out_dir / "keep_p_samples"
@@ -43,16 +43,19 @@ class KeepPSamplesIn(object):
             cache[a["category_id"]].add(a["image_id"])
             labels[a["image_id"]].add(a["category_id"])
 
-        groups = defaultdict(list)
-        for img in coco["images"]:
-            ranks, image_id = [], img["id"]
-            for category_id in labels[image_id]:
-                ranks.append((category_id, len(cache[category_id])))
-            groups[self._get_group(ranks)].append(image_id)
-        print([(k, len(groups[k])) for k in sorted(groups.keys())])
+        if stratified:
+            groups = defaultdict(list)
+            for img in coco["images"]:
+                ranks, image_id = [], img["id"]
+                for category_id in labels[image_id]:
+                    ranks.append((category_id, len(cache[category_id])))
+                groups[self._get_group(ranks)].append(image_id)
+        else:
+            groups = {"none": [img["id"] for img in coco["images"]]}
 
+        print([(k, len(groups[k])) for k in sorted(groups.keys())])
         for i in range(10):
-            test_index, train_index = self._split(groups)
+            test_index, train_index = self._split(groups, seed + 1000 * i)
 
             this_dir = make_dir(out_dir / f"{i}")
             save_dataset(coco, this_dir / "all.json", None)
@@ -61,17 +64,23 @@ class KeepPSamplesIn(object):
         return str(out_dir)
 
     def _get_group(self, ranks):
+        c = 1000
         if ranks:
-            return sorted(ranks, key=lambda x: x[1] + x[0] / 1000)[0][0]
-        return -1
+            c = min(ranks, key=lambda x: x[1] + x[0] / 1000)[0]
+        return f"{c:04d}"
 
-    def _split(self, groups):
+    def _split(self, groups, seed):
         test_index, train_index = [], []
-        for image_ids in groups.values():
+
+        for _, image_ids in groups.items():
+            image_ids = sorted(image_ids)
+
             p = self.p
             if isinstance(p, float):
                 p = 1 + int(p * len(image_ids))
 
+            np.random.seed(seed)
+            np.random.shuffle(image_ids)
             if p >= len(image_ids):
                 test_index.extend(image_ids)
                 train_index.extend(image_ids)
@@ -122,8 +131,9 @@ class LeavePGroupsOut(object):
 
     def _split(self, coco, this_dir, test_index):
         this_dir = make_dir(this_dir)
-        indices = np.arange(len(test_index))
         train_index = np.logical_not(test_index)
+        image_ids = np.asarray([img["id"] for img in coco["images"]])
+
         save_dataset(coco, this_dir / "all.json", None)
-        save_dataset(coco, this_dir / "test.json", indices[test_index])
-        save_dataset(coco, this_dir / "train.json", indices[train_index])
+        save_dataset(coco, this_dir / "test.json", image_ids[test_index])
+        save_dataset(coco, this_dir / "train.json", image_ids[train_index])

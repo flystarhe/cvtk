@@ -72,7 +72,7 @@ class RandomCrop(object):
 
         inner = (dst_w >= 4) * (dst_h >= 4) * (dst_area >= 48)
         x = np.clip(np.sqrt(src_area), 32, None)
-        x = 0.5 + 0.5 * 32 / x
+        x = 0.5 + 0.5 * 32 / x - 1e-5
 
         s1 = (dst_area >= src_area * x)
         s2 = (dst_area >= self.nonignore)
