@@ -92,13 +92,14 @@ class KeepPSamplesIn(object):
 
 class LeavePGroupsOut(object):
 
-    def __init__(self, p_groups):
+    def __init__(self, p_groups, limit=1000):
         """Leave P Group(s) Out cross-validator
 
         Args:
             p_groups (int): Number of groups (``p``) to leave out
         """
         self.p_groups = p_groups
+        self.limit = limit
 
     def split(self, coco_file):
         coco = load_json(coco_file)
@@ -134,6 +135,12 @@ class LeavePGroupsOut(object):
         train_index = np.logical_not(test_index)
         image_ids = np.asarray([img["id"] for img in coco["images"]])
 
+        test_index = image_ids[test_index]
+        train_index = image_ids[train_index]
+
+        if len(train_index) > self.limit:
+            train_index = train_index[:self.limit]
+
         save_dataset(coco, this_dir / "all.json", None)
-        save_dataset(coco, this_dir / "test.json", image_ids[test_index])
-        save_dataset(coco, this_dir / "train.json", image_ids[train_index])
+        save_dataset(coco, this_dir / "test.json", test_index)
+        save_dataset(coco, this_dir / "train.json", train_index)
