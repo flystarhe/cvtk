@@ -17,6 +17,7 @@ def save_dataset(coco, out_file, image_ids=None):
         coco["images"] = [img for img in coco["images"] if img["id"] in image_ids]
         coco["annotations"] = [a for a in coco["annotations"] if a["image_id"] in image_ids]
 
+    print(f"{out_file} images: {len(coco['images'])}")
     return save_json(coco, out_file)
 
 
@@ -54,8 +55,8 @@ class KeepPSamplesIn(object):
             groups = {"none": [img["id"] for img in coco["images"]]}
 
         print([(k, len(groups[k])) for k in sorted(groups.keys())])
-        for i in range(10):
-            test_index, train_index = self._split(groups, seed + 1000 * i)
+        for i in range(1, 11):
+            test_index, train_index = self._split(groups, seed * i)
 
             this_dir = make_dir(out_dir / f"{i}")
             save_dataset(coco, this_dir / "all.json", None)
@@ -81,7 +82,7 @@ class KeepPSamplesIn(object):
 
             np.random.seed(seed)
             np.random.shuffle(image_ids)
-            if p >= len(image_ids):
+            if p >= len(image_ids) * 0.8:
                 test_index.extend(image_ids)
                 train_index.extend(image_ids)
             else:
@@ -101,7 +102,7 @@ class LeavePGroupsOut(object):
         self.p_groups = p_groups
         self.limit = limit
 
-    def split(self, coco_file):
+    def split(self, coco_file, seed=1000):
         coco = load_json(coco_file)
         out_dir = Path(coco_file).parent
         out_dir = out_dir / "leave_p_groups"
@@ -116,8 +117,8 @@ class LeavePGroupsOut(object):
             row = img_index[a["image_id"]]
             flags[row, col] = 1
 
-        for i, test_index in enumerate(self._iter_test_masks(flags)):
-            self._split(coco, out_dir / f"{i}", test_index)
+        for i, test_index in enumerate(self._iter_test_masks(flags), 1):
+            self._split(coco, out_dir / f"{i}", test_index, seed * i)
         return str(out_dir)
 
     def _iter_test_masks(self, flags):
@@ -130,7 +131,7 @@ class LeavePGroupsOut(object):
         for indices in combinations(groups, self.p_groups):
             yield flags[:, indices].sum(axis=1) >= 1
 
-    def _split(self, coco, this_dir, test_index):
+    def _split(self, coco, this_dir, test_index, seed):
         this_dir = make_dir(this_dir)
         train_index = np.logical_not(test_index)
         image_ids = np.asarray([img["id"] for img in coco["images"]])
@@ -139,6 +140,8 @@ class LeavePGroupsOut(object):
         train_index = image_ids[train_index]
 
         if len(train_index) > self.limit:
+            np.random.seed(seed)
+            np.random.shuffle(train_index)
             train_index = train_index[:self.limit]
 
         save_dataset(coco, this_dir / "all.json", None)
