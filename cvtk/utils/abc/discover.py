@@ -1,7 +1,8 @@
 import hiplot as hip
 import numpy as np
 
-from cvtk.io import load_json, load_pkl
+from cvtk.io import load_json
+from cvtk.io import load_pkl
 from cvtk.utils.abc import nms
 
 
@@ -50,7 +51,7 @@ def hip_result(results, score_thr, **kw):
         results (list): List of `(file_name, none, none, dt, gt)`.
         score_thr (dict): Such as `dict(CODE1=S1, CODE2=S2, ...)`.
     """
-    clean_mode = kw.get("clean_mode", "iou")
+    clean_mode = kw.get("clean_mode", "min")
     clean_param = kw.get("clean_param", 0.1)
     match_mode = kw.get("match_mode", "iou")
     min_pos_iou = kw.get("min_pos_iou", 0.3)

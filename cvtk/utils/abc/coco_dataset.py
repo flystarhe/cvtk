@@ -6,7 +6,8 @@ from lxml import etree
 from pathlib import Path
 from xml.etree import ElementTree
 
-from cvtk.io import load_json, save_json
+from cvtk.io import load_json
+from cvtk.io import save_json
 from cvtk.utils.abc import nms
 
 
@@ -40,7 +41,7 @@ def _filter(img_dir, ann_dir, include=None):
         if include.is_dir():
             targets = [x for x in include.glob("**/*")]
         elif include.suffix == ".csv":
-            targets = pd.read_csv(include)["file_name"].to_list()
+            targets = pd.read_csv(include)["file_name"].tolist()
         elif include.suffix == ".json":
             targets = [img["file_name"] for img in load_json(include)["images"]]
         else:

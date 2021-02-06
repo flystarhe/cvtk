@@ -16,7 +16,7 @@ def make_dir(path):
     return path
 
 
-def incrementpath(path, exist_ok=True, sep=""):
+def increment_path(path, exist_ok=True, sep=""):
     path = Path(path)
 
     if not path.exists() or exist_ok:
