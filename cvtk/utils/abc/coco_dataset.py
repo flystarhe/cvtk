@@ -112,7 +112,7 @@ def copyfile(out_dir, img_path, del_shapes):
     cur_file = cur_dir / img_path.name
     cv.imwrite(str(cur_file), im)
 
-    return cur_file.relative_to(out_dir)
+    return cur_file.relative_to(out_dir).as_posix()
 
 
 def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None):
@@ -127,8 +127,8 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     shutil.rmtree(out_dir, ignore_errors=True)
 
     labels = set()
-    for _, a in imdb:
-        labels.update([s["label"] for s in a["shapes"]])
+    for _, ann_data in imdb:
+        labels.update([s["label"] for s in ann_data["shapes"]])
 
     labels = sorted(labels)
     cat_index = {l: i for i, l in enumerate(labels)}
