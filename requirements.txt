@@ -1,3 +1,10 @@
 # requirements.txt
+hiplot>=0.1.23
+lxml==4.6.2
+networkx
+numpy
+opencv-contrib-python>=4.5.1
+pandas
+requests
 simplejson
 tqdm

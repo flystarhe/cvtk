@@ -58,7 +58,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    print(patch_dataset(**vars(args)))
+    kw = vars(args)
+
+    print(patch_dataset(**kw))
 
 
 if __name__ == "__main__":

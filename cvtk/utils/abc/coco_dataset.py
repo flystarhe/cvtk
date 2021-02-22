@@ -40,9 +40,9 @@ def _filter(img_dir, ann_dir, include=None):
         include = Path(include)
         if include.is_dir():
             targets = [x for x in include.glob("**/*")]
-        elif include.suffix == ".csv":
+        elif include.suffix == ".csv":  # from hiplot
             targets = pd.read_csv(include)["file_name"].tolist()
-        elif include.suffix == ".json":
+        elif include.suffix == ".json":  # from coco dataset
             targets = [img["file_name"] for img in load_json(include)["images"]]
         else:
             raise NotImplementedError(f"Not Implemented file type: {include.name}")
@@ -130,8 +130,8 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     labels = set()
     for _, ann_data in imdb:
         labels.update([s["label"] for s in ann_data["shapes"]])
-
     labels = sorted(labels)
+
     cat_index = {l: i for i, l in enumerate(labels)}
 
     imgs, anns = [], []

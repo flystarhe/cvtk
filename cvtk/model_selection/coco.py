@@ -83,7 +83,7 @@ class KeepPSamplesIn(object):
 
             np.random.seed(seed)
             np.random.shuffle(image_ids)
-            if p >= len(image_ids) * 0.8:
+            if p >= len(image_ids):
                 test_index.extend(image_ids)
                 train_index.extend(image_ids)
             else:
