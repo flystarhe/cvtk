@@ -1,6 +1,9 @@
 # cvtk
 computer vision toolkit of pytorch
 
+* pytorch v1.7.1
+* torchvision v0.8.2
+
 ## packaging
 ```
 # pip install --upgrade setuptools wheel
