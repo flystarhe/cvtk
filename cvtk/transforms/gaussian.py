@@ -119,7 +119,7 @@ def peak(X, Y, mu1, mu2, sigma1, sigma2, p=0):
     """
     X, Y = (X - mu1) / sigma1, (Y - mu2) / sigma2
     Z = np.exp(-0.5 * (X**2 + Y**2)) / (2 * np.pi * sigma1 * sigma2)
-    return Z.astype("float32")
+    return Z
 
 
 def peak_region(w, h, mu1, mu2, sigma1, sigma2):
@@ -157,8 +157,8 @@ class PeakNoise(object):
         var = random.uniform(self.var_limit[0], self.var_limit[1])
         sigma2 = var ** 0.5
 
-        w = np.random.randint(16, img_w // 2)
-        h = np.random.randint(16, img_h // 2)
+        w = np.random.randint(16, img_w // 3)
+        h = np.random.randint(16, img_h // 3)
         x = np.random.randint(0, img_w - w)
         y = np.random.randint(0, img_h - h)
 
@@ -168,7 +168,10 @@ class PeakNoise(object):
 
         dtype = image.dtype
         image = image.astype("float32")
-        image[y: y + h, x: x + w] += noise
+        if random.random() < 0.5:
+            image[y: y + h, x: x + w] += noise
+        else:
+            image[y: y + h, x: x + w] -= noise
 
         maxval = MAX_VALUES_BY_DTYPE.get(dtype, 1.0)
         return np.clip(image, 0, maxval).astype(dtype)
