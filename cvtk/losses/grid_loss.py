@@ -57,7 +57,7 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
     """
     _, h, w = feats.size()
     feats = F.softmax(feats, dim=0)
-    target = torch.zeros(h, w, dtype=torch.int64)
+    target = torch.zeros(h, w, dtype=torch.int64, device=feats.device)
 
     if labels is None:
         labels = [1] * len(bboxes)
