@@ -61,6 +61,7 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
 
     feats = F.softmax(feats, dim=0)
     target = torch.zeros(h, w, dtype=torch.int64)
+    bboxes = sorted(bboxes, key=lambda x: (x[3] - x[1]) * (x[2] - x[0]), reverse=True)
     for (x1, y1, x2, y2), label in zip(bboxes, labels):
         x1 = math.floor(x1 * s)
         y1 = math.floor(y1 * s)
