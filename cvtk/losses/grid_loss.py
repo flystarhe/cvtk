@@ -55,14 +55,15 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
         bboxes (List[List[int]]): such as `[[x1, y1, x2, y2],]`.
         labels (List[int], optional): where each value in `[1, K-1]`.
     """
-    k, h, w = feats.size()
-    if k == 2 or labels is None:
-        labels = [1 for _ in bboxes]
-
+    _, h, w = feats.size()
     feats = F.softmax(feats, dim=0)
     target = torch.zeros(h, w, dtype=torch.int64)
-    bboxes = sorted(bboxes, key=lambda x: (x[3] - x[1]) * (x[2] - x[0]), reverse=True)
-    for (x1, y1, x2, y2), label in zip(bboxes, labels):
+
+    if labels is None:
+        labels = [1] * len(bboxes)
+
+    data = [(x1, y1, x2, y2, label, (x2 - x1) * (y2 - y1)) for (x1, y1, x2, y2), label in zip(bboxes, labels)]
+    for x1, y1, x2, y2, label, _ in sorted(data, key=lambda args: args[5], reverse=True):
         x1 = math.floor(x1 * s)
         y1 = math.floor(y1 * s)
         x2 = math.ceil(x2 * s) + 1
@@ -83,7 +84,7 @@ def test():
     s = 1.0
     topk = 3
     feats = torch.randn(3, 14, 14)
-    bboxes = [[1, 1, 9, 5], [3, 3, 13, 6], [8, 8, 13, 13]]
+    bboxes = [[1, 1, 9, 5], [3, 3, 13, 7], [9, 9, 13, 13]]
     labels = [1, 2, 1]
     res = make_target(s, topk, feats, bboxes, labels)
     res[res.eq(-100)] = -1
