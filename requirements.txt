@@ -1,4 +1,5 @@
 # requirements.txt
+albumentations>=0.5.2
 hiplot>=0.1.23
 lxml==4.6.2
 networkx

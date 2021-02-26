@@ -17,9 +17,11 @@ def check_bboxes(src_bboxes, dst_bboxes):
     dst_h = dst_bboxes[:, 3] - dst_bboxes[:, 1]
     dst_area = dst_w * dst_h
 
-    s1 = (dst_area >= src_area * 0.5)
-    s2 = (dst_w >= src_w) * (dst_h >= src_w * 1.5)
-    s3 = (dst_h >= src_h) * (dst_w >= src_h * 1.5)
+    x = np.where(src_area > 64**2, 0.5, 1.0 - 1e-5)
+
+    s1 = (dst_area >= src_area * x)
+    s2 = (dst_w >= src_w) * (dst_h >= src_w * 2)
+    s3 = (dst_h >= src_h) * (dst_w >= src_h * 2)
     ss = s1 + s2 + s3
 
     inner = (dst_w >= 4) * (dst_h >= 4)
@@ -69,12 +71,10 @@ class ToyDataset:
             label = id2label[ann["category_id"]]
             imdb[ann["image_id"]].append((bbox, label))
 
-        ids = set(imgs.keys()) & set(imdb.keys())
-
         self.imgs = imgs
         self.imdb = imdb
         self.names = names
-        self.ids = sorted(ids)
+        self.ids = sorted(imgs.keys())
 
     def random_crop(self, image, bboxes, labels):
         img_h, img_w = image.shape[:2]
@@ -124,9 +124,9 @@ class ToyDataset:
         image_id = self.ids[index]
 
         file_name = self.imgs[image_id]
-        image_path = str(self._img_prefix / file_name)
+        image_path = self._img_prefix / file_name
 
-        image = cv.imread(image_path, 1)
+        image = cv.imread(str(image_path), 1)
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         bboxes, labels = map(list, zip(*self.imdb[image_id]))
 
