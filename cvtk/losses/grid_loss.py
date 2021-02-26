@@ -1,5 +1,6 @@
 import math
 import torch
+from torch import nn
 from torch.nn import functional as F
 
 
@@ -78,6 +79,37 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
         target = balance_target(target, feats[0])
 
     return target
+
+
+def _transform(pred, target, img_shape, topk=3, balance=True):
+    # where `pred` type as `Tensor[N, C, H, W]`.
+    s = pred.size(-1) / img_shape[-1]
+    pred = pred.detach()
+
+    _target = []
+    for i in range(pred.size(0)):
+        _target.append(make_target(s, topk, pred[i], target[i]["bboxes"], target[i]["labels"], balance))
+    return torch.stack(_target, 0)
+
+
+def criterion(inputs, target, topk=3, balance=True):
+    """
+    Args:
+        inputs (OrderedDict): required `out`. optional `aux`.
+        target (List[Dict]): required `bboxes`, `img_shape`, `labels`.
+    """
+    img_shape = target[0]["img_shape"]
+
+    _pred = inputs["out"]
+    _target = _transform(_pred, target, img_shape, topk, balance)
+    loss = nn.functional.cross_entropy(_pred, _target, ignore_index=-100)
+
+    if "aux" in inputs:
+        _pred = inputs["aux"]
+        _target = _transform(_pred, target, img_shape, topk, balance)
+        return loss + 0.5 * nn.functional.cross_entropy(_pred, _target, ignore_index=-100)
+
+    return loss
 
 
 def test():
