@@ -1,9 +1,9 @@
-import cv2 as cv
 import shutil
 from argparse import ArgumentParser
 from pathlib import Path
-from tqdm import tqdm
 
+import cv2 as cv
+from tqdm import tqdm
 
 IMG_EXTENSIONS = set([".jpg", ".jpeg", ".png", ".bmp"])
 

@@ -1,8 +1,8 @@
+import re
+
 import cv2 as cv
 import numpy as np
-import re
 import requests
-
 
 URL_REGEX = re.compile(r"http://|https://|ftp://")
 

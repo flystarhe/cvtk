@@ -1,13 +1,11 @@
 import copy
-import numpy as np
 import shutil
 from collections import defaultdict
 from itertools import combinations
 from pathlib import Path
 
-from cvtk.io import load_json
-from cvtk.io import make_dir
-from cvtk.io import save_json
+import numpy as np
+from cvtk.io import load_json, make_dir, save_json
 
 
 def save_dataset(coco, out_file, image_ids=None):

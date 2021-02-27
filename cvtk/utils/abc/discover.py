@@ -1,8 +1,6 @@
 import hiplot as hip
 import numpy as np
-
-from cvtk.io import load_json
-from cvtk.io import load_pkl
+from cvtk.io import load_json, load_pkl
 from cvtk.utils.abc import nms
 
 

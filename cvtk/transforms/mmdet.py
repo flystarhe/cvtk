@@ -1,8 +1,9 @@
 """Transforms for mmdet2.x
 """
+from collections import defaultdict
+
 import cv2 as cv
 import numpy as np
-from collections import defaultdict
 
 
 class RandomCrop(object):

@@ -1,15 +1,13 @@
-import cv2 as cv
-import numpy as np
-import pandas as pd
 import shutil
-from lxml import etree
 from pathlib import Path
 from xml.etree import ElementTree
 
-from cvtk.io import load_json
-from cvtk.io import save_json
+import cv2 as cv
+import numpy as np
+import pandas as pd
+from cvtk.io import load_json, save_json
 from cvtk.utils.abc import nms
-
+from lxml import etree
 
 DEL_LABELS = set(["__DEL"])
 ANN_EXTENSIONS = set([".xml", ".json"])

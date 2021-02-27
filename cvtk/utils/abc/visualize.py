@@ -1,13 +1,10 @@
-import cv2 as cv
-import pandas as pd
 import shutil
 from collections import defaultdict
 from pathlib import Path
 
-
-from cvtk.io import increment_path
-from cvtk.io import load_json
-from cvtk.io import load_pkl
+import cv2 as cv
+import pandas as pd
+from cvtk.io import increment_path, load_json, load_pkl
 from cvtk.utils.abc import nms
 
 

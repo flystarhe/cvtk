@@ -1,12 +1,11 @@
 # https://github.com/ultralytics/JSON2YOLO
 import shutil
-import numpy as np
-from tqdm import tqdm
 from argparse import ArgumentParser
 from pathlib import Path
 
-
+import numpy as np
 from cvtk.io import load_json
+from tqdm import tqdm
 
 
 def yolo_from_coco(coco_dir, json_dir):

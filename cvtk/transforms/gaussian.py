@@ -3,7 +3,6 @@ from functools import wraps
 
 import numpy as np
 
-
 MAX_VALUES_BY_DTYPE = {
     np.dtype("uint8"): 255,
     np.dtype("uint16"): 65535,
