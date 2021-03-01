@@ -1,11 +1,12 @@
-from collections import defaultdict, deque
+# https://github.com/pytorch/vision/blob/master/references/segmentation/utils.py
 import datetime
-import time
-import torch
-import torch.distributed as dist
-
 import errno
 import os
+import time
+from collections import defaultdict, deque
+
+import torch
+import torch.distributed as dist
 
 
 class SmoothedValue(object):
@@ -215,9 +216,8 @@ def cat_list(images, fill_value=0):
 
 def collate_fn(batch):
     images, targets = list(zip(*batch))
-    batched_imgs = cat_list(images, fill_value=0)
-    batched_targets = cat_list(targets, fill_value=255)
-    return batched_imgs, batched_targets
+    images = torch.stack(images, 0)
+    return images, targets
 
 
 def mkdir(path):
