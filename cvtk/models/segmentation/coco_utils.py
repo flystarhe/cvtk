@@ -88,7 +88,7 @@ class ToyDataset:
                 x1 = np.random.randint(0, img_w - self._crop_size)
                 y1 = np.random.randint(0, img_h - self._crop_size)
                 x2, y2 = x1 + self._crop_size, y1 + self._crop_size
-                return image[y1:y2, x1:x2], bboxes, labels
+                return image[y1: y2, x1: x2], bboxes, labels
 
             bboxes = np.asarray(bboxes, dtype=np.int64)
             labels = np.asarray(labels, dtype=np.int64)
@@ -115,9 +115,10 @@ class ToyDataset:
             bboxes -= np.asarray([x1, y1, x1, y1])
             image = image[y1: y2, x1: x2]
 
-            dst_mask, drop_mask = check_bboxes(old_bboxes, bboxes, self._safe)
+            dst_mask, drop_mask = check_bboxes(old_bboxes, bboxes, self._safe * 0.5)
             for x1, y1, x2, y2 in bboxes[drop_mask].tolist():
                 image[y1: y2, x1: x2] = 0
+
             bboxes = bboxes[dst_mask].tolist()
             labels = labels[dst_mask].tolist()
 
