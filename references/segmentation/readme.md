@@ -6,13 +6,13 @@ Tested on `pytorch:1.7.1`.
 * pytorch: 1.7.1
 
 ```
-docker pull registry.cn-hangzhou.aliyuncs.com/flystarhe/python:3.8-torch1.7.1
-docker tag registry.cn-hangzhou.aliyuncs.com/flystarhe/python:3.8-torch1.7.1 python:3.8-torch1.7.1
+docker pull registry.cn-hangzhou.aliyuncs.com/flystarhe/containers:torch1.7.1-dev
+docker tag registry.cn-hangzhou.aliyuncs.com/flystarhe/containers:torch1.7.1-dev torch:1.7.1-dev
 
-docker save -o python3.8-torch1.7.1-21.03.tar python:3.8-torch1.7.1
-docker load -i python3.8-torch1.7.1-21.03.tar
+docker save -o torch1.7.1-dev-21.03.tar torch:1.7.1-dev
+docker load -i torch1.7.1-dev-21.03.tar
 
-t=test && docker run --gpus all -d -p 9000:9000 --ipc=host --name ${t} -v "$(pwd)"/${t}:/workspace python:3.8-torch1.7.1
+t=test && docker run --gpus all -d -p 9000:9000 --ipc=host --name ${t} -v "$(pwd)"/${t}:/workspace torch:1.7.1-dev
 ```
 
 ## training scripts
