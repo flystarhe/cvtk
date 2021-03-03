@@ -51,6 +51,6 @@ def display_image(image, output, target, save_to):
     image = draw_bbox(image, bboxes, None)
     output = draw_bbox(output, bboxes, None)
     img = np.concatenate((image, output), axis=1)
-    filename = os.path.join(save_to, f"{image_id}.jpg")
+    filename = os.path.join(save_to, f"{image_id:04d}.jpg")
     cv.imwrite(filename, cv.cvtColor(img, cv.COLOR_RGB2BGR))
     return filename
