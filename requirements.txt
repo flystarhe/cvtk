@@ -5,6 +5,7 @@ lxml==4.6.2
 networkx
 numpy
 #opencv-contrib-python>=4.5.1
+opencv-python>=4.5.1
 pandas
 requests
 simplejson
