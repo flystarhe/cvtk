@@ -6,6 +6,7 @@ import torch
 import torch.utils.data
 from cvtk.losses.grid_loss import _transform, criterion
 from cvtk.models.segmentation import coco_utils, segmentation, utils
+from references.segmentation.visualize import display_image
 
 
 def evaluate(model, data_loader, device, num_classes):
@@ -27,6 +28,23 @@ def evaluate(model, data_loader, device, num_classes):
         confmat.reduce_from_all_processes()
 
     return confmat
+
+
+def test_one_epoch(model, data_loader, device, save_to=None):
+    if save_to is None:
+        save_to = "/workspace/results/0000"
+
+    model.eval()
+    utils.mkdir(save_to)
+    metric_logger = utils.MetricLogger(delimiter="  ")
+    header = "Test:"
+    with torch.no_grad():
+        for image, target in metric_logger.log_every(data_loader, 100, header):
+            output = model(image.to(device))
+
+            display_image(image, output["out"], target, save_to)
+
+    return save_to
 
 
 def train_one_epoch(model, optimizer, data_loader, lr_scheduler, device, epoch, print_freq):
@@ -115,8 +133,8 @@ def main(args):
             args.start_epoch = checkpoint["epoch"] + 1
 
     if args.test_only:
-        confmat = evaluate(model, data_loader_test, device=device, num_classes=num_classes)
-        print(confmat)
+        save_to = test_one_epoch(model, data_loader_test, device=device)
+        print(save_to)
         return
 
     start_time = time.time()
