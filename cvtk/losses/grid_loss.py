@@ -37,8 +37,8 @@ def balance_target(target, weight):
     """
     negative_mask = target.eq(0)
     n_positive = target.gt(0).sum().item()
-    limit = max(target.size(1), n_positive * 2)
 
+    limit = max(3, n_positive * 2)
     n_negative = negative_mask.sum().item()
     if n_negative >= limit + 2:
         probs = weight[negative_mask].sort()[0]
