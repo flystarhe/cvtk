@@ -58,10 +58,9 @@ import time
 CVTK_HOME = "/workspace/cvtk"
 !cd {CVTK_HOME} && git log -1 --oneline
 os.environ["MKL_THREADING_LAYER"] = "GNU"
-EXPERIMENT_NAME = time.strftime("T%m%d_%H%M")
+EXPERIMENT_NAME = "output_dir_from_training"
 
 DATA_PATH = "/workspace/coco"
-CHECKPOINT = "/workspace/results/xxxx/model_30.pth"
 ARGS = " ".join([
     "-m torch.distributed.launch --nproc_per_node=2 --use_env",
     f"{CVTK_HOME}/references/segmentation/train.py",
@@ -78,7 +77,7 @@ ARGS = " ".join([
     "--lr 0.02",
     "--print-freq 10",
     f"--output-dir /workspace/results/{EXPERIMENT_NAME}",
-    f"--resume {CHECKPOINT}",
+    f"--resume /workspace/results/{EXPERIMENT_NAME}/model_30.pth",
     "--test-only",
 ])
 !PYTHONPATH={CVTK_HOME} python {ARGS}
