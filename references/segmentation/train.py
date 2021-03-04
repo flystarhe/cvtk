@@ -168,7 +168,7 @@ def parse_args():
     parser.add_argument("--train", default="coco.json", help="subset for train")
     parser.add_argument("--val", default="coco.json", help="subset for val")
     parser.add_argument("--single-cls", action="store_true", help="single")
-    parser.add_argument("--crop-size", default=480, help="train phase")
+    parser.add_argument("--crop-size", default=480, type=int, help="train phase")
 
     parser.add_argument("--device", default="cuda", help="device")
     parser.add_argument("--model", default="fcn_resnet50", help="model")
