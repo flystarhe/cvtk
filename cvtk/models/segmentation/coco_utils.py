@@ -139,11 +139,11 @@ class ToyDataset:
         else:
             bboxes, labels = tmp
 
-        if self._phase == "train":
-            image, bboxes, labels = self.random_crop(image, bboxes, labels)
-
         augmented = self.transforms(image=image, bboxes=bboxes, labels=labels)
         image, bboxes, labels = augmented["image"], augmented["bboxes"], augmented["labels"]
+
+        if self._phase == "train":
+            image, bboxes, labels = self.random_crop(image, bboxes, labels)
 
         hw = image.shape[:2]
         image = F.to_tensor(image)  # \in [0, 1]
