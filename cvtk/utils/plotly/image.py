@@ -24,14 +24,14 @@ def imhist(img_dir, start=0, limit=1):
         hist, v_sum, h_sum = _hist(npimg)
 
         ax = axs[0]
-        ax.plot(hist)
-        ax.set_title("Image gray value")
+        ax.plot(hist / (hist.max() + 1))
+        ax.set_title("Image grayscale value")
         ax.set_xlim(0, 256)
 
         ax = axs[1]
-        ax.plot(v_sum)
+        ax.plot(v_sum / (v_sum.max() + 1))
         ax.set_title("Vertical projection")
 
         ax = axs[2]
-        ax.plot(h_sum)
+        ax.plot(h_sum / (h_sum.max() + 1))
         ax.set_title("Horizontal projection")
