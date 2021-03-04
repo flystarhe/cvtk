@@ -106,7 +106,7 @@ def copyfile(out_dir, img_path, del_shapes):
         x, y, w, h = map(int, bbox)
         im[y: y + h, x: x + w] = 0
 
-    cur_dir = out_dir / "images" / img_path.parent
+    cur_dir = out_dir / "images" / img_path.parent.name
     cur_dir.mkdir(parents=True, exist_ok=True)
     cur_file = cur_dir / img_path.name
     cv.imwrite(str(cur_file), im)
