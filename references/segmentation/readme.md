@@ -45,10 +45,46 @@ ARGS = " ".join([
     "-j 16",
     "--lr 0.02",
     "--print-freq 10",
-    f"--output-dir results/{EXPERIMENT_NAME}",
+    f"--output-dir /workspace/results/{EXPERIMENT_NAME}",
 ])
 !PYTHONPATH={CVTK_HOME} python {ARGS}
 ```
 
 ## test scripts
+```
+import os
+import time
+
+CVTK_HOME = "/workspace/cvtk"
+!cd {CVTK_HOME} && git log -1 --oneline
+os.environ["MKL_THREADING_LAYER"] = "GNU"
+EXPERIMENT_NAME = time.strftime("T%m%d_%H%M")
+
+DATA_PATH = "/workspace/coco"
+CHECKPOINT = "/workspace/results/xxxx/model_30.pth"
+ARGS = " ".join([
+    "-m torch.distributed.launch --nproc_per_node=2 --use_env",
+    f"{CVTK_HOME}/references/segmentation/train.py",
+    f"--data-path {DATA_PATH}",
+    "--train coco.json",
+    "--val coco.json",
+    "--single-cls",
+    "--crop-size 480",
+    "--model fcn_resnet50",
+    "--aux-loss",
+    "--epochs 30",
+    "-b 8",
+    "-j 16",
+    "--lr 0.02",
+    "--print-freq 10",
+    f"--output-dir /workspace/results/{EXPERIMENT_NAME}",
+    f"--resume {CHECKPOINT}",
+    "--test-only",
+])
+!PYTHONPATH={CVTK_HOME} python {ARGS}
+```
+
+With dir:
+```
 pass
+```
