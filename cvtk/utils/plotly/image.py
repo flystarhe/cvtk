@@ -13,10 +13,17 @@ def _hist(npimg):
     return hist, v_sum, h_sum
 
 
-def imhist(img_dir, start=0, limit=1):
+def imhist(img_path, start=0, limit=1):
     # jupyter: %matplotlib inline
-    img_list = sorted(Path(img_dir).glob("**/*"))
-    img_list = [x for x in img_list if x.suffix in IMG_EXTENSIONS]
+    img_path = Path(img_path)
+
+    if img_path.is_file():
+        img_list = [img_path]
+    elif img_path.is_dir():
+        img_list = sorted(img_path.glob("**/*"))
+        img_list = [x for x in img_list if x.suffix in IMG_EXTENSIONS]
+    else:
+        raise TypeError(f"{img_path} is not a file or dir")
 
     fig, axs = plt.subplots(nrows=3, figsize=(8, 12))
     for img_path in img_list[start: start + limit]:
