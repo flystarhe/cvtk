@@ -145,10 +145,9 @@ class ToyDataset:
         if self._phase == "train":
             image, bboxes, labels = self.random_crop(image, bboxes, labels)
 
-        hw = image.shape[:2]
         image = F.to_tensor(image)  # \in [0, 1]
         image = F.normalize(image, self.mean, self.std, True)
-        target = dict(id=image_id, bboxes=bboxes, labels=labels, img_shape=hw)
+        target = dict(id=image_id, bboxes=bboxes, labels=labels, img_shape=list(image.size()))
         return image, target
 
     def __len__(self):
