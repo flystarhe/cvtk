@@ -13,7 +13,7 @@ def draw_bbox(npimg, bboxes, labels):
     for bbox, label in zip(bboxes, labels):
         x1, y1, x2, y2 = list(map(int, bbox))
         cv.rectangle(npimg, (x1, y1), (x2, y2), (0, 0, 255), thickness=2)
-        cv.putText(img, f"{label}", (x1, y1), cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
+        cv.putText(npimg, f"{label}", (x1, y1), cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
     return npimg
 
 
