@@ -43,7 +43,7 @@ ARGS = " ".join([
     "--epochs 30",
     "-b 8",
     "-j 16",
-    "--lr 0.02",
+    "--lr 0.005",
     "--print-freq 10",
     f"--output-dir /workspace/results/{EXPERIMENT_NAME}",
 ])
@@ -77,7 +77,7 @@ ARGS = " ".join([
     "--lr 0.02",
     "--print-freq 10",
     f"--output-dir /workspace/results/{EXPERIMENT_NAME}",
-    f"--resume /workspace/results/{EXPERIMENT_NAME}/model_30.pth",
+    f"--resume /workspace/results/{EXPERIMENT_NAME}/model_29.pth",
     "--test-only",
 ])
 !PYTHONPATH={CVTK_HOME} python {ARGS}
