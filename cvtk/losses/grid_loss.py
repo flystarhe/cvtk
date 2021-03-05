@@ -6,7 +6,7 @@ from torch.nn import functional as F
 
 
 def _split(a, b, n=7):
-    n = max(1, min(n, (b - a) // 2))
+    n = max(1, min(n, b - a))
     x = torch.linspace(a, b, n + 1, dtype=torch.int64).tolist()
     return [(i, j) for i, j in zip(x, x[1:])]
 
@@ -38,9 +38,9 @@ def balance_target(target, weight):
     negative_mask = target.eq(0)
     n_positive = target.gt(0).sum().item()
 
-    limit = max(7, n_positive * 2)
+    limit = max(target.size(1), n_positive * 2)
     n_negative = negative_mask.sum().item()
-    if n_negative >= limit + 2:
+    if n_negative > limit:
         probs = weight[negative_mask].sort()[0]
         target[negative_mask * weight.gt(probs[limit])] = -100
 
@@ -55,12 +55,12 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
         bboxes (List[List[int]]): such as `[[x1, y1, x2, y2],]`.
         labels (List[int], optional): where each value in `[1, K-1]`.
     """
-    _, h, w = feats.size()
-    feats = F.softmax(feats, dim=0)
-    target = torch.zeros(h, w, dtype=torch.int64, device=feats.device)
-
     if labels is None:
         labels = [1] * len(bboxes)
+
+    _, h, w = feats.size()
+    feats = F.softmax(feats, dim=0)
+    masks = torch.zeros_like(feats, dtype=torch.uint8)
 
     data = [(x1, y1, x2, y2, label, (x2 - x1) * (y2 - y1)) for (x1, y1, x2, y2), label in zip(bboxes, labels)]
     for x1, y1, x2, y2, label, _ in sorted(data, key=lambda args: args[5], reverse=True):
@@ -70,9 +70,15 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
         y2 = math.ceil(y2 * s - 0.3) + 1
         x2, y2 = min(w, x2), min(h, y2)
 
-        target[y1:y2, x1:x2] = -100
+        masks[label, y1:y2, x1:x2] = 2
         for cy, cx, _ in _point(feats[label], topk, x1, y1, x2, y2):
-            target[cy, cx] = label
+            masks[label, cy, cx] = 1
+
+    target = masks.argmax(0)
+
+    mask = masks.sum(0)
+    target[mask == 0] = 0
+    target[mask >= 2] = -100
 
     if balance:
         target = balance_target(target, feats[0])
