@@ -46,8 +46,8 @@ def display_image(image, output, target, save_to):
     h, w, _ = image.shape
     output = cv.resize(output, (w, h), interpolation=cv.INTER_NEAREST)
 
+    image_id = target["id"]
     bboxes = target["bboxes"]
-    image_id = target["image_id"]
     image = draw_bbox(image, bboxes, None)
     output = draw_bbox(output, bboxes, None)
     img = np.concatenate((image, output), axis=1)
