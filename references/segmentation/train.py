@@ -178,7 +178,7 @@ def parse_args():
     parser.add_argument("-j", "--workers", default=16, type=int, help="data loading workers")
     parser.add_argument("--lr", default=0.01, type=float, help="initial learning rate")
     parser.add_argument("--momentum", default=0.9, type=float, help="momentum")
-    parser.add_argument("-wd", "--weight-decay", default=1e-4, type=float)
+    parser.add_argument("--wd", default=1e-4, type=float, dest="weight_decay")
 
     parser.add_argument("--print-freq", default=10, type=int, help="print frequency")
     parser.add_argument("--output-dir", default=".", help="where to save")
