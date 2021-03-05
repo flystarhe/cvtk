@@ -38,7 +38,7 @@ def balance_target(target, weight):
     negative_mask = target.eq(0)
     n_positive = target.gt(0).sum().item()
 
-    limit = max(3, n_positive * 2)
+    limit = max(7, n_positive * 2)
     n_negative = negative_mask.sum().item()
     if n_negative >= limit + 2:
         probs = weight[negative_mask].sort()[0]
@@ -64,10 +64,10 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
 
     data = [(x1, y1, x2, y2, label, (x2 - x1) * (y2 - y1)) for (x1, y1, x2, y2), label in zip(bboxes, labels)]
     for x1, y1, x2, y2, label, _ in sorted(data, key=lambda args: args[5], reverse=True):
-        x1 = math.floor(x1 * s)
-        y1 = math.floor(y1 * s)
-        x2 = math.ceil(x2 * s) + 1
-        y2 = math.ceil(y2 * s) + 1
+        x1 = math.floor(x1 * s + 0.3)
+        y1 = math.floor(y1 * s + 0.3)
+        x2 = math.ceil(x2 * s - 0.3) + 1
+        y2 = math.ceil(y2 * s - 0.3) + 1
         x2, y2 = min(w, x2), min(h, y2)
 
         target[y1:y2, x1:x2] = -100
