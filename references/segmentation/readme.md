@@ -43,7 +43,7 @@ ARGS = " ".join([
     "--epochs 30",
     "-b 8",
     "-j 16",
-    "--lr 0.005",
+    "--lr 0.01",
     "--print-freq 10",
     f"--output-dir /workspace/results/{EXPERIMENT_NAME}",
 ])
