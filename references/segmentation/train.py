@@ -4,7 +4,7 @@ import time
 
 import torch
 import torch.utils.data
-from cvtk.losses.grid_loss import _transform, criterion
+from cvtk.losses.line_loss import _transform, _criterion
 from cvtk.models.segmentation import coco_utils, segmentation, utils
 from references.segmentation.visualize import display_image
 
@@ -21,7 +21,7 @@ def evaluate(model, data_loader, device, num_classes):
 
             _output = output["out"]
             img_shape = target[0]["img_shape"]
-            _target = _transform(_output, target, img_shape, topk=3, balance=True)
+            _target = _transform(_output, target, topk=1, balance=True)
 
             confmat.update(_target.flatten(), _output.argmax(1).flatten())
 
@@ -54,7 +54,7 @@ def train_one_epoch(model, optimizer, data_loader, lr_scheduler, device, epoch, 
     header = "Epoch: [{}]".format(epoch)
     for image, target in metric_logger.log_every(data_loader, print_freq, header):
         output = model(image.to(device))
-        loss = criterion(output, target, topk=3, balance=True)
+        loss = _criterion(output, target, topk=3, balance=True)
 
         optimizer.zero_grad()
         loss.backward()

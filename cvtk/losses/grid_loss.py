@@ -28,7 +28,7 @@ def _point(feat, topk, x1, y1, x2, y2):
     return sorted(points, key=lambda args: args[2], reverse=True)[:topk]
 
 
-def balance_target(target, weight):
+def _balance(target, weight):
     """Assume `cross_entropy(ignore_index=-100)`.
 
     Args:
@@ -38,11 +38,11 @@ def balance_target(target, weight):
     negative_mask = target.eq(0)
     n_positive = target.gt(0).sum().item()
 
-    limit = max(target.size(1), n_positive * 2)
     n_negative = negative_mask.sum().item()
+    limit = max(target.size(1), n_positive * 2)
     if n_negative > limit:
-        probs = weight[negative_mask].sort()[0]
-        target[negative_mask * weight.gt(probs[limit])] = -100
+        p = weight[negative_mask].sort()[0]
+        target[negative_mask * weight.gt(p[limit])] = -100
 
     return target
 
@@ -81,14 +81,14 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
     target[mask >= 2] = -100
 
     if balance:
-        target = balance_target(target, feats[0])
+        target = _balance(target, feats[0])
 
     return target
 
 
-def _transform(pred, target, img_shape, topk=3, balance=True):
+def _transform(pred, target, topk=3, balance=True):
     # where `pred` type as `Tensor[N, C, H, W]`.
-    s = pred.size(-1) / img_shape[-1]
+    s = pred.size(-1) / target[0]["img_shape"][-1]
     pred = pred.detach()
 
     _target = []
@@ -97,21 +97,19 @@ def _transform(pred, target, img_shape, topk=3, balance=True):
     return torch.stack(_target, 0)
 
 
-def criterion(inputs, target, topk=3, balance=True):
+def _criterion(inputs, target, topk=3, balance=True):
     """
     Args:
         inputs (OrderedDict): required `out`. optional `aux`.
         target (List[Dict]): required `bboxes`, `img_shape`, `labels`.
     """
-    img_shape = target[0]["img_shape"]
-
     _pred = inputs["out"]
-    _target = _transform(_pred, target, img_shape, topk, balance)
+    _target = _transform(_pred, target, topk, balance)
     loss = nn.functional.cross_entropy(_pred, _target, ignore_index=-100)
 
     if "aux" in inputs:
         _pred = inputs["aux"]
-        _target = _transform(_pred, target, img_shape, topk, balance)
+        _target = _transform(_pred, target, topk, balance)
         return loss + 0.5 * nn.functional.cross_entropy(_pred, _target, ignore_index=-100)
 
     return loss
