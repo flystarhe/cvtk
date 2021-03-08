@@ -21,7 +21,7 @@ def evaluate(model, data_loader, device, num_classes):
 
             _output = output["out"]
             img_shape = target[0]["img_shape"]
-            _target = _transform(_output, target, img_shape, topk=1, balance=False)
+            _target = _transform(_output, target, img_shape, topk=3, balance=True)
 
             confmat.update(_target.flatten(), _output.argmax(1).flatten())
 
@@ -54,7 +54,7 @@ def train_one_epoch(model, optimizer, data_loader, lr_scheduler, device, epoch, 
     header = "Epoch: [{}]".format(epoch)
     for image, target in metric_logger.log_every(data_loader, print_freq, header):
         output = model(image.to(device))
-        loss = criterion(output, target, topk=7, balance=True)
+        loss = criterion(output, target, topk=3, balance=True)
 
         optimizer.zero_grad()
         loss.backward()
