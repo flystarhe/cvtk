@@ -5,8 +5,8 @@ from torch import nn
 from torch.nn import functional as F
 
 
-def _split(a, b, n=7):
-    n = max(1, min(n, b - a))
+def _split(a, b, n):
+    n = min(n, b - a)
     x = torch.linspace(a, b, n + 1, dtype=torch.int64).tolist()
     return [(i, j) for i, j in zip(x, x[1:])]
 
@@ -39,7 +39,7 @@ def _balance(target, weight):
     n_positive = target.gt(0).sum().item()
 
     n_negative = negative_mask.sum().item()
-    limit = max(target.size(1), n_positive * 2)
+    limit = max(target.size(1), n_positive * 3)
     if n_negative > limit:
         p = weight[negative_mask].sort()[0]
         target[negative_mask * weight.gt(p[limit])] = -100

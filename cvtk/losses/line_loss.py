@@ -6,17 +6,21 @@ from torch.nn import functional as F
 
 
 def _point(feat, topk, x1, y1, x2, y2):
-    n_xs, n_ys = x2 - x1, y2 - y1
+    w, h = x2 - x1, y2 - y1
 
     points = []
-    if n_xs > n_ys:
-        for xi in range(x1, x2):
-            h = torch.argmax(feat[y1:y2, xi]).item()
-            points.append((y1 + h, xi))
+    if w > h:
+        _, indices = feat[y1:y2, x1:x2].sort(dim=0)
+        indices = indices[-1, :].tolist()
+
+        for x_shift, y_shift in enumerate(indices):
+            points.append((y1 + y_shift, x1 + x_shift))
     else:
-        for yi in range(y1, y2):
-            w = torch.argmax(feat[yi, x1:x2]).item()
-            points.append((yi, x1 + w))
+        _, indices = feat[y1:y2, x1:x2].sort(dim=1)
+        indices = indices[:, -1].tolist()
+
+        for y_shift, x_shift in enumerate(indices):
+            points.append((y1 + y_shift, x1 + x_shift))
 
     return points
 
@@ -32,7 +36,7 @@ def _balance(target, weight):
     n_positive = target.gt(0).sum().item()
 
     n_negative = negative_mask.sum().item()
-    limit = max(target.size(1), n_positive * 2)
+    limit = max(target.size(1), n_positive * 3)
     if n_negative > limit:
         p = weight[negative_mask].sort()[0]
         target[negative_mask * weight.gt(p[limit])] = -100
