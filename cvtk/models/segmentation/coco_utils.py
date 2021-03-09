@@ -17,7 +17,7 @@ def check_bboxes(src_bboxes, dst_bboxes, nonignore):
     dst_h = dst_bboxes[:, 3] - dst_bboxes[:, 1]
     dst_area = dst_w * dst_h
 
-    x = np.where(src_area > 64**2, 0.5, 1.0 - 1e-5)
+    x = np.where(src_area > 96**2, 0.5, 1.0 - 1e-5)
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
@@ -41,13 +41,13 @@ class ToyDataset:
 
         if phase == "train":
             self.transforms = A.Compose([
-                A.SmallestMaxSize(max_size=512, interpolation=cv.INTER_LINEAR, p=1.0),
+                A.SmallestMaxSize(max_size=crop_size + 32, interpolation=cv.INTER_LINEAR, p=1.0),
                 A.RandomBrightnessContrast(p=0.2),
                 A.Flip(p=0.5),
             ], bbox_params=A.BboxParams(format="pascal_voc", label_fields=["labels"]))
         else:
             self.transforms = A.Compose([
-                A.SmallestMaxSize(max_size=512, interpolation=cv.INTER_LINEAR, p=1.0),
+                A.SmallestMaxSize(max_size=crop_size + 32, interpolation=cv.INTER_LINEAR, p=1.0),
             ], bbox_params=A.BboxParams(format="pascal_voc", label_fields=["labels"]))
 
         self.mean = [0.485, 0.456, 0.406]
