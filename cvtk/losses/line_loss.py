@@ -6,23 +6,21 @@ from torch.nn import functional as F
 
 
 def _point(feat, topk, x1, y1, x2, y2):
-    w, h = x2 - x1, y2 - y1
-
     points = []
-    if w > h:
-        _, indices = feat[y1:y2, x1:x2].sort(dim=0)
-        indices = indices[-1, :].tolist()
 
-        for x_shift, y_shift in enumerate(indices):
-            points.append((y1 + y_shift, x1 + x_shift))
-    else:
-        _, indices = feat[y1:y2, x1:x2].sort(dim=1)
-        indices = indices[:, -1].tolist()
+    _, indices = feat[y1:y2, x1:x2].sort(dim=0)
+    indices = indices[-1, :].tolist()
 
-        for y_shift, x_shift in enumerate(indices):
-            points.append((y1 + y_shift, x1 + x_shift))
+    for x_shift, y_shift in enumerate(indices):
+        points.append((y1 + y_shift, x1 + x_shift))
 
-    return points
+    _, indices = feat[y1:y2, x1:x2].sort(dim=1)
+    indices = indices[:, -1].tolist()
+
+    for y_shift, x_shift in enumerate(indices):
+        points.append((y1 + y_shift, x1 + x_shift))
+
+    return set(points)
 
 
 def _balance(target, weight):
