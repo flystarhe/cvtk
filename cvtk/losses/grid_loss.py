@@ -14,7 +14,6 @@ def _split(a, b, n):
 def _point(feat, topk, x1, y1, x2, y2):
     _y_pairs = _split(y1, y2, topk)
     _x_pairs = _split(x1, x2, topk)
-    topk = max(len(_y_pairs), len(_x_pairs))
 
     points = []
     for _y1, _y2 in _y_pairs:
@@ -25,7 +24,8 @@ def _point(feat, topk, x1, y1, x2, y2):
             cs = feat[cy, cx].item()  # sort key
             points.append((cy, cx, cs))
 
-    return sorted(points, key=lambda args: args[2], reverse=True)[:topk]
+    topk = max(len(_y_pairs), len(_x_pairs))
+    return sorted(points, key=lambda args: args[2])[-topk:]
 
 
 def _balance(target, weight):
