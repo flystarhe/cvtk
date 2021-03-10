@@ -6,7 +6,8 @@ from torch.nn import functional as F
 
 
 def _point(feat, topk, x1, y1, x2, y2):
-    _, indices = feat[y1:y2, x1:x2].view(-1).sort()
+    feat = feat[y1:y2, x1:x2].contiguous()
+    _, indices = feat.view(-1).sort()
     indices = indices.tolist()
     w, h = x2 - x1, y2 - y1
     topk = max(w, h)
