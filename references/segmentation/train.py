@@ -4,12 +4,12 @@ import time
 
 import torch
 import torch.utils.data
-from cvtk.losses.line_loss import _transform, _criterion
+from cvtk.losses import box_loss, line_loss, mixed_loss
 from cvtk.models.segmentation import coco_utils, segmentation, utils
 from references.segmentation.visualize import display_image
 
 
-def evaluate(model, data_loader, device, num_classes):
+def evaluate(model, transform, data_loader, device, num_classes):
     print(data_loader.dataset.names)
     model.eval()
     confmat = utils.ConfusionMatrix(num_classes)
@@ -20,8 +20,7 @@ def evaluate(model, data_loader, device, num_classes):
             output = model(image.to(device))
 
             _output = output["out"]
-            img_shape = target[0]["img_shape"]
-            _target = _transform(_output, target, topk=1, balance=True)
+            _target = transform(_output, target, topk=1, balance=True)
 
             confmat.update(_target.flatten(), _output.argmax(1).flatten())
 
@@ -47,14 +46,14 @@ def test_one_epoch(model, data_loader, device, save_to=None):
     return save_to
 
 
-def train_one_epoch(model, optimizer, data_loader, lr_scheduler, device, epoch, print_freq):
+def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, print_freq):
     model.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter("lr", utils.SmoothedValue(window_size=1, fmt="{value}"))
     header = "Epoch: [{}]".format(epoch)
     for image, target in metric_logger.log_every(data_loader, print_freq, header):
         output = model(image.to(device))
-        loss = _criterion(output, target, topk=3, balance=True)
+        loss = criterion(output, target, topk=7, balance=True)
 
         optimizer.zero_grad()
         loss.backward()
@@ -137,12 +136,24 @@ def main(args):
         print(save_to)
         return
 
+    if args.loss_fn == "box":
+        criterion = box_loss.criterion
+        transform = box_loss.transform
+    elif args.loss_fn == "line":
+        criterion = line_loss.criterion
+        transform = line_loss.transform
+    elif args.loss_fn == "mixed":
+        criterion = mixed_loss.criterion
+        transform = mixed_loss.transform
+    else:
+        raise NotImplementedError("loss {} is not supported".format(args.loss_fn))
+
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        train_one_epoch(model, optimizer, data_loader, lr_scheduler, device, epoch, args.print_freq)
-        confmat = evaluate(model, data_loader_test, device=device, num_classes=num_classes)
+        train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, device, epoch, args.print_freq)
+        confmat = evaluate(model, transform, data_loader_test, device=device, num_classes=num_classes)
         print(confmat)
         utils.save_on_master(
             {
@@ -173,6 +184,7 @@ def parse_args():
     parser.add_argument("--device", default="cuda", help="device")
     parser.add_argument("--model", default="fcn_resnet50", help="model")
     parser.add_argument("--aux-loss", action="store_true", help="auxiliar loss")
+    parser.add_argument("--loss-fn", default="box", help="specifying loss function")
     parser.add_argument("--epochs", default=30, type=int, help="number of total epochs")
     parser.add_argument("-b", "--batch-size", default=8, type=int, help="batch size for train")
     parser.add_argument("-j", "--workers", default=16, type=int, help="data loading workers")
