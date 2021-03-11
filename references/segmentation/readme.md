@@ -40,6 +40,7 @@ ARGS = " ".join([
     "--crop-size 480",
     "--model fcn_resnet50",
     "--aux-loss",
+    "--loss-fn box",
     "--epochs 30",
     "-b 8",
     "-j 16",
@@ -52,12 +53,6 @@ ARGS = " ".join([
 
 ## test scripts
 ```
-import os
-import time
-
-CVTK_HOME = "/workspace/cvtk"
-!cd {CVTK_HOME} && git log -1 --oneline
-os.environ["MKL_THREADING_LAYER"] = "GNU"
 EXPERIMENT_NAME = "output_dir_from_training"
 
 DATA_PATH = "/workspace/coco"
@@ -71,6 +66,7 @@ ARGS = " ".join([
     "--crop-size 480",
     "--model fcn_resnet50",
     "--aux-loss",
+    "--loss-fn box",
     "--epochs 30",
     "-b 8",
     "-j 16",
