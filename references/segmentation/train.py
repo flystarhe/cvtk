@@ -4,7 +4,7 @@ import time
 
 import torch
 import torch.utils.data
-from cvtk.losses import box_loss, line_loss, mixed_loss
+from cvtk.losses import box_loss, grid_loss, line_loss, mixed_loss
 from cvtk.models.segmentation import coco_utils, segmentation, utils
 from references.segmentation.visualize import display_image
 
@@ -20,7 +20,7 @@ def evaluate(model, transform, data_loader, device, num_classes):
             output = model(image.to(device))
 
             _output = output["out"]
-            _target = transform(_output, target, topk=1, balance=True)
+            _target = transform(_output, target, topk=1, balance=False)
 
             confmat.update(_target.flatten(), _output.argmax(1).flatten())
 
@@ -139,6 +139,9 @@ def main(args):
     if args.loss_fn == "box":
         criterion = box_loss.criterion
         transform = box_loss.transform
+    elif args.loss_fn == "grid":
+        criterion = grid_loss.criterion
+        transform = grid_loss.transform
     elif args.loss_fn == "line":
         criterion = line_loss.criterion
         transform = line_loss.transform
