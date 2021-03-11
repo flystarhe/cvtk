@@ -6,6 +6,11 @@ from torch.nn import functional as F
 
 
 def _point(feat, topk, x1, y1, x2, y2):
+    if topk == 1:
+        _shift = torch.argmax(feat[y1:y2, x1:x2]).item()
+        y_shift, x_shift = divmod(_shift, x2 - x1)
+        return [(y1 + y_shift, x1 + x_shift)]
+
     feat = feat[y1:y2, x1:x2].contiguous()
     _, indices = feat.view(-1).sort()
     indices = indices.tolist()
@@ -13,8 +18,8 @@ def _point(feat, topk, x1, y1, x2, y2):
     topk = max(w, h)
 
     points = []
-    for index in indices[-topk:]:
-        y_shift, x_shift = divmod(index, w)
+    for _shift in indices[-topk:]:
+        y_shift, x_shift = divmod(_shift, w)
         points.append((y1 + y_shift, x1 + x_shift))
 
     return points
@@ -78,7 +83,7 @@ def make_target(s, topk, feats, bboxes, labels=None, balance=False):
     return target
 
 
-def _transform(pred, target, topk=3, balance=True):
+def transform(pred, target, topk=3, balance=True):
     # where `pred` type as `Tensor[N, C, H, W]`.
     s = pred.size(-1) / target[0]["img_shape"][-1]
     pred = pred.detach()
@@ -89,19 +94,19 @@ def _transform(pred, target, topk=3, balance=True):
     return torch.stack(_target, 0)
 
 
-def _criterion(inputs, target, topk=3, balance=True):
+def criterion(inputs, target, topk=3, balance=True):
     """
     Args:
         inputs (OrderedDict): required `out`. optional `aux`.
         target (List[Dict]): required `bboxes`, `img_shape`, `labels`.
     """
     _pred = inputs["out"]
-    _target = _transform(_pred, target, topk, balance)
+    _target = transform(_pred, target, topk, balance)
     loss = nn.functional.cross_entropy(_pred, _target, ignore_index=-100)
 
     if "aux" in inputs:
         _pred = inputs["aux"]
-        _target = _transform(_pred, target, topk, balance)
+        _target = transform(_pred, target, topk, balance)
         return loss + 0.5 * nn.functional.cross_entropy(_pred, _target, ignore_index=-100)
 
     return loss
