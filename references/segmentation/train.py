@@ -132,7 +132,8 @@ def main(args):
             args.start_epoch = checkpoint["epoch"] + 1
 
     if args.test_only:
-        save_to = test_one_epoch(model, data_loader_test, device=device)
+        save_to = os.path.join(args.output_dir, "images_test")
+        save_to = test_one_epoch(model, data_loader_test, device=device, save_to=save_to)
         print(save_to)
         return
 
