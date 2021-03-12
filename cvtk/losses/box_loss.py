@@ -11,8 +11,8 @@ def _point(feat, topk, x1, y1, x2, y2):
         y_shift, x_shift = divmod(_shift, x2 - x1)
         return [(y1 + y_shift, x1 + x_shift)]
 
-    feat = feat[y1:y2, x1:x2].contiguous()
-    _, indices = feat.view(-1).sort()
+    tensor = feat[y1:y2, x1:x2].contiguous()
+    _, indices = tensor.view(-1).sort()
     indices = indices.tolist()
     w, h = x2 - x1, y2 - y1
     topk = max(w, h)
