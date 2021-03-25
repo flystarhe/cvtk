@@ -7,6 +7,9 @@ numpy
 #opencv-contrib-python-headless>=4.5.1
 opencv-python-headless>=4.5.1
 pandas
+pillow>=8.1.2
 requests
 simplejson
+scikit-image>=0.18.1
+scikit-learn>=0.24.1
 tqdm
