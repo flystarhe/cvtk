@@ -5,28 +5,29 @@ Tested on `pytorch:1.7.1`.
 * python: 3.8
 * pytorch: 1.7.1
 
-```
-docker pull registry.cn-hangzhou.aliyuncs.com/flystarhe/containers:torch1.7.1-dev
-docker tag registry.cn-hangzhou.aliyuncs.com/flystarhe/containers:torch1.7.1-dev torch:1.7.1-dev
+```sh
+docker pull flystarhe/torch:1.8.1-cuda10.2-dev
+docker tag flystarhe/torch:1.8.1-cuda10.2-dev torch:1.8.1-cuda10.2-dev
 
-docker save -o torch1.7.1-dev-21.03.tar torch:1.7.1-dev
-docker load -i torch1.7.1-dev-21.03.tar
+docker save -o torch1.8.1-cuda10.2-dev.tar torch:1.8.1-cuda10.2-dev
+docker load -i torch1.8.1-cuda10.2-dev.tar
 
-t=test && docker run --gpus all -d -p 9000:9000 --ipc=host --name ${t} -v "$(pwd)"/${t}:/workspace torch:1.7.1-dev
+t=torch18_cu10 && docker run --gpus all -d -p 7000:9000 --ipc=host --name ${t} -v "$(pwd)"/${t}:/workspace torch:1.8.1-cuda10.2-dev
 ```
 
 ## training scripts
 Assume `git clone https://github.com/flystarhe/cvtk.git /workspace/cvtk`. you must modify the following flags:
 
 * `--nproc_per_node=<number_of_gpus_available>`
+* models: `fcn_resnet50,fcn_resnet101,deeplabv3_resnet50,deeplabv3_resnet101`
 
-```
+```jupyter
 import os
 import time
 
 CVTK_HOME = "/workspace/cvtk"
 !cd {CVTK_HOME} && git log -1 --oneline
-os.environ["MKL_THREADING_LAYER"] = "GNU"
+#os.environ["MKL_THREADING_LAYER"] = "GNU"
 EXPERIMENT_NAME = time.strftime("T%m%d_%H%M")
 
 DATA_PATH = "/workspace/coco"
