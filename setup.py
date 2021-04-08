@@ -4,8 +4,12 @@ import re
 
 
 here = Path(__file__).parent.resolve()
+
+
 with open(here / "cvtk/__init__.py", "r") as fh:
     version = re.search(r"__version__ = \"(.*?)\"", fh.read()).group(1)
+
+
 long_description = (here / "readme.md").read_text(encoding="utf-8")
 
 
@@ -20,8 +24,6 @@ def parse_requirements(fpath):
 
     packages = list(gen_packages_items())
     return packages
-
-
 install_requires = parse_requirements(here / "requirements.txt")
 
 
