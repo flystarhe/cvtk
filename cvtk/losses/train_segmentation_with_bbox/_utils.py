@@ -1,6 +1,7 @@
 import math
+
 import torch
-from torch import nn, Tensor
+from torch import Tensor, nn
 from torch.nn import functional as F
 
 
@@ -21,18 +22,18 @@ def _mask_top_by_grid(roi: Tensor, k: int = 1):
     Args:
         roi (Tensor[H, W]): input tensor.
     """
-    kernel_size = tuple([(s - 1) // k + 1 for s in roi.size()])
+    kernel_size = tuple([(s - 1) // k + 1 for s in roi.shape])
 
     if kernel_size > (1, 1):
         pool = nn.MaxPool2d(kernel_size, ceil_mode=True)
 
         output = pool(roi[None, None])
         flattened = torch.flatten(output)
-        val = torch.topk(flattened, max(output.size()), dim=-1)[0][-1]
-        output = F.interpolate(output, size=roi.size(), align_corners=False)
+        val = torch.topk(flattened, max(output.shape), dim=-1)[0][-1]
+        output = F.interpolate(output, size=roi.shape, align_corners=False)
         return torch.ge(output, val)
 
-    return _mask_top_by_full(roi, k=max(roi.size()))
+    return _mask_top_by_full(roi, k=max(roi.shape))
 
 
 def _mask_top_by_line_h(roi: Tensor, k: int = 1):
@@ -100,9 +101,7 @@ def _balance(target, weight):
         weight (Tensor[H, W]): probability of BG.
     """
     negative_mask = target.eq(0)
-    n_positive = target.gt(0).sum().item()
-
-    limit = n_positive * 3
+    limit = 3 * target.gt(0).sum().item()
     if negative_mask.sum().item() > limit:
         p = weight[negative_mask].sort()[0][limit]
         target[negative_mask * weight.gt(p)] = -100
