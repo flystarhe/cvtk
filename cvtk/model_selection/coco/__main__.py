@@ -1,6 +1,8 @@
 import os
 import sys
 
+from cvtk.model_selection.coco import KeepPSamplesIn, LeavePGroupsOut
+
 # Remove "" and current working directory from the first entry of sys.path
 while True:
     if sys.path[0] in ("", os.getcwd()):
@@ -14,18 +16,18 @@ def _main(args=None):
         args = sys.argv[1:]
 
     if args[0] == "kp":
-        return "move `cvtk.model_selection` to `cvtk.model_selection.coco`"
+        worker = KeepPSamplesIn(args[1])
     elif args[0] == "lp":
-        return "move `cvtk.model_selection` to `cvtk.model_selection.coco`"
+        worker = LeavePGroupsOut(args[1])
     else:
         raise NotImplementedError(f"Not supported args: {args}")
 
-    return "none"
+    return worker.split(args[2])
 
 
 # develop:
-# python cvtk/model_selection [kp|lp]
+# python cvtk/model_selection/coco [kp|lp]
 # runtime:
-# python -m cvtk.model_selection [kp|lp] <samples/groups> <coco file path>
+# python -m cvtk.model_selection.coco [kp|lp] <samples/groups> <coco file path>
 if __name__ == "__main__":
     sys.exit(_main())
