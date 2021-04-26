@@ -61,7 +61,8 @@ def _collate_fn(nodes, lines, dt):
         vals = [dt[i] for i in i_set]
         best = max(vals, key=lambda x: x["score"])
         bboxes = np.array([d["xyxy"] for d in vals], dtype=np.float32)
-        (x1, y1), (x2, y2) = bboxes[:, :2].min(axis=0).tolist(), bboxes[:, 2:].max(axis=0).tolist()
+        x1, y1 = bboxes[:, :2].min(axis=0).tolist()
+        x2, y2 = bboxes[:, 2:].max(axis=0).tolist()
         best["bbox"] = [x1, y1, x2 - x1, y2 - y1]
         best["area"] = (x2 - x1) * (y2 - y1)
         best["xyxy"] = [x1, y1, x2, y2]

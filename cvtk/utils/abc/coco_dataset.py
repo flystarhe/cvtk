@@ -23,7 +23,7 @@ def _trans(data, key):
 
 
 def _norm(bbox, img_w, img_h):
-    x, y, w, h = map(float, bbox)
+    x, y, w, h = map(int, bbox)
     x, y = max(0, x), max(0, y)
     w = min(img_w - x, w)
     h = min(img_h - y, h)
@@ -41,9 +41,9 @@ def _filter(img_dir, ann_dir, include=None):
         elif include.suffix == ".csv":  # from hiplot
             targets = pd.read_csv(include)["file_name"].tolist()
         elif include.suffix == ".json":  # from coco dataset
-            targets = [img["file_name"] for img in load_json(include)["images"]]
+            targets = [x["file_name"] for x in load_json(include)["images"]]
         else:
-            raise NotImplementedError(f"Not Implemented file type: {include.name}")
+            raise NotImplementedError(f"Not Implemented: {include.name}")
 
         targets = set([Path(file_name).stem for file_name in targets])
         img_list = [x for x in img_list if x.stem in targets]
@@ -77,7 +77,13 @@ def xml2json(xml_path):
         ymin = int(float(bndbox.find("ymin").text))
         xmax = int(float(bndbox.find("xmax").text))
         ymax = int(float(bndbox.find("ymax").text))
-        shapes.append({"label": name, "points": [[xmin, ymin], [xmax, ymax]], "shape_type": "rectangle"})
+        shapes.append(
+            {
+                "label": name,
+                "shape_type": "rectangle",
+                "points": [[xmin, ymin], [xmax, ymax]],
+            }
+        )
 
     size = xmltree.find("size")
     imageWidth = int(float(size.find("width").text))
@@ -95,23 +101,22 @@ def make_imdb(img_dir, ann_dir, include=None):
         else:
             ann_data = dict(shapes=[], imageWidth=0, imageHeight=0)
 
-        cache.append((img_path, ann_data))
+        cache.append((img_path, ann_data, img_path.relative_to(img_dir)))
     return cache
 
 
-def copyfile(out_dir, img_path, del_shapes):
+def copyfile(out_dir, img_path, out_path, del_shapes):
     im = cv.imread(str(img_path), 1)
 
     for bbox in del_shapes:
         x, y, w, h = map(int, bbox)
         im[y: y + h, x: x + w] = 0
 
-    cur_dir = out_dir / "images" / img_path.parent.name
-    cur_dir.mkdir(parents=True, exist_ok=True)
-    cur_file = cur_dir / img_path.name
-    cv.imwrite(str(cur_file), im)
+    cur_file = out_dir / "images" / out_path
+    cur_file.parent.mkdir(parents=True, exist_ok=True)
 
-    return cur_file.relative_to(out_dir).as_posix()
+    cv.imwrite(str(cur_file), im)
+    return str(cur_file.relative_to(out_dir))
 
 
 def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None):
@@ -126,7 +131,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     shutil.rmtree(out_dir, ignore_errors=True)
 
     labels = set()
-    for _, ann_data in imdb:
+    for _, ann_data, _ in imdb:
         labels.update([s["label"] for s in ann_data["shapes"]])
     labels = sorted(labels)
 
@@ -134,7 +139,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
 
     imgs, anns = [], []
     img_id, ann_id = 0, 0
-    for img_path, ann_data in imdb:
+    for img_path, ann_data, out_path in imdb:
         shapes = ann_data["shapes"]
         img_w = ann_data["imageWidth"]
         img_h = ann_data["imageHeight"]
@@ -161,7 +166,8 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                 w, h = x_max - x_min, y_max - y_min
                 bbox = _norm([x_min, y_min, w, h], img_w, img_h)
                 x_mid, y_mid = (x_min + x_max) * 0.5, (y_min + y_max) * 0.5
-                points = [(x_mid, y_min), (x_max, y_mid), (x_mid, y_max), (x_min, y_mid)]
+                points = [(x_mid, y_min), (x_max, y_mid),
+                          (x_mid, y_max), (x_min, y_mid)]
             elif shape_type == "polygon":
                 assert len(points) >= 3, "[[x, y], [x, y], ...]"
                 xys = np.asarray(points)
@@ -171,7 +177,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                 w, h = x_max - x_min, y_max - y_min
                 bbox = _norm([x_min, y_min, w, h], img_w, img_h)
             else:
-                raise NotImplementedError(f"Not Implemented shape type: {shape_type}")
+                raise NotImplementedError(f"Not Implemented: {shape_type}")
 
             if label in DEL_LABELS:
                 del_shapes.append(bbox)
@@ -188,10 +194,11 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         img = dict(id=img_id,
                    width=img_w,
                    height=img_h,
-                   file_name=copyfile(out_dir, img_path, del_shapes))
+                   file_name=copyfile(out_dir, img_path, out_path, del_shapes))
         imgs.append(img)
 
-    cats = [dict(id=i, name=name, supercategory="") for i, name in enumerate(labels)]
+    cats = [dict(id=i, name=name, supercategory="")
+            for i, name in enumerate(labels)]
     coco = dict(images=imgs, annotations=anns, categories=cats)
     save_json(coco, out_dir / "coco.json")
     return str(out_dir)

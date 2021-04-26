@@ -59,7 +59,8 @@ def hip_result(results, score_thr, **kw):
 
     vals = []
     for file_name, _, _, dt, gt in results:
-        dt = [d for d in dt if d["score"] >= get_val(score_thr, d["label"], 0.3)]
+        dt = [d for d in dt
+              if d["score"] >= get_val(score_thr, d["label"], 0.3)]
         dt = nms.clean_by_bbox(dt, clean_mode, clean_param)
         ious = nms.bbox_overlaps(dt, gt, match_mode)
 
@@ -90,7 +91,7 @@ def hip_result(results, score_thr, **kw):
                 b = [g["label"], g["score"]] + g["bbox"][2:]
                 vals.append([file_name, 0.] + a + b)
 
-    names = "file_name,iou,label,score,w,h,gt_label,gt_score,gt_w,gt_h".split(",")
+    names = "fn,iou,label,score,w,h,gt_label,gt_score,gt_w,gt_h".split(",")
     data = [{a: b for a, b in zip(names, val)} for val in vals]
     hip.Experiment.from_iterable(data).display()
     return "jupyter.hiplot"

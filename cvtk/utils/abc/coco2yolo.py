@@ -1,6 +1,5 @@
 # https://github.com/ultralytics/JSON2YOLO
 import shutil
-from argparse import ArgumentParser
 from pathlib import Path
 
 import numpy as np
@@ -21,9 +20,11 @@ def yolo_from_coco(coco_dir, json_dir):
     for json_file in sorted(json_dir.glob("*.json")):
         data = load_json(json_file)
 
+        names = [c["supercategory"] + "." + c["name"]
+                 for c in data["categories"]]
+
         images = {"%g" % x["id"]: x for x in data["images"]}
         cvt_id = {c["id"]: i for i, c in enumerate(data["categories"])}
-        names = [c["supercategory"] + "." + c["name"] for c in data["categories"]]
 
         image_path_list = []
         for img in data["images"]:
@@ -55,21 +56,6 @@ def yolo_from_coco(coco_dir, json_dir):
 
             if (box[2] > 0.) and (box[3] > 0.):  # if w * h > 0
                 with open(out_dir / "labels" / (Path(f).stem + ".txt"), "a") as file:
-                    file.write("%g %.6f %.6f %.6f %.6f\n" % (cvt_id[x["category_id"]], *box))
+                    file.write("%g %.6f %.6f %.6f %.6f\n" %
+                               (cvt_id[x["category_id"]], *box))
     return str(out_dir)
-
-
-def parse_args():
-    parser = ArgumentParser(description="yolo dataset from coco")
-    parser.add_argument("-a", "--coco_dir", type=str, help="coco dir")
-    parser.add_argument("-b", "--json_dir", type=str, help="json dir")
-    return parser.parse_args()
-
-
-def main():
-    args = parse_args()
-    print(yolo_from_coco(**vars(args)))
-
-
-if __name__ == "__main__":
-    main()

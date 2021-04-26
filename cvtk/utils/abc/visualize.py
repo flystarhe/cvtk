@@ -34,20 +34,19 @@ def draw_bbox(img, anns, offset=0, color_val=(0, 0, 255)):
 
         text = "{}: {}: {:.2f}: {}/{}={:.2f}".format(
             i, ann["label"], ann.get("score", 1.0), h, w, h / w)
-        cv.putText(img, text, left_bottom, cv.FONT_HERSHEY_COMPLEX, 1.0, color_val)
+        cv.putText(img, text, left_bottom,
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, color_val)
     return img
 
 
 def display_coco(coco_dir, coco_file, output_dir, **kw):
+    include = kw.get("include", None)
+
     coco_dir = Path(coco_dir)
     coco = load_json(coco_dir / coco_file)
 
     output_dir = Path(output_dir)
     shutil.rmtree(output_dir, ignore_errors=True)
-
-    output_dir.mkdir(parents=True)
-
-    include = kw.get("include", None)
 
     targets = None
     if include is not None:
@@ -66,6 +65,7 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
         gts.append(cache[img["id"]])
         imgs.append(coco_dir / img["file_name"])
 
+    output_dir.mkdir(parents=True)
     for anns, file_name in zip(gts, imgs):
         file_name = Path(file_name)
 
@@ -99,7 +99,8 @@ def display_result(results, score_thr, output_dir, **kw):
         if targets is not None and file_name.stem not in targets:
             continue
 
-        dt = [d for d in dt if d["score"] >= get_val(score_thr, d["label"], 0.3)]
+        dt = [d for d in dt
+              if d["score"] >= get_val(score_thr, d["label"], 0.3)]
         if simple:
             dt = nms.clean_by_bbox(dt, clean_mode, clean_param)
 
