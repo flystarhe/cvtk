@@ -16,13 +16,11 @@ def _main(args=None):
         args = sys.argv[1:]
 
     if args[0] == "kp":
-        worker = KeepPSamplesIn(args[1])
+        return KeepPSamplesIn(args[1]).split(args[2])
     elif args[0] == "lp":
-        worker = LeavePGroupsOut(args[1])
+        return LeavePGroupsOut(args[1]).split(args[2])
     else:
         raise NotImplementedError(f"Not supported args: {args}")
-
-    return worker.split(args[2])
 
 
 # develop:
