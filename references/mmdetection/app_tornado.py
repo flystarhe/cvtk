@@ -12,8 +12,8 @@ class MainHandler(tornado.web.RequestHandler):
         try:
             image = self.get_argument("image")
             output = inference_detector(my_model, image)
-            results = {"status": 0, "data": output}
-            if self.get_argument("gc", "none") != "none":
+            results = {"status": 0, "data": str(output)}
+            if self.get_argument("gc", "n") == "y":
                 gc.collect()
         except Exception:
             results = {"status": 1}
