@@ -67,13 +67,11 @@ def args_coco_keep_p_sample(args=None):
 
 
 def args_coco_leave_p_group(args=None):
-    parser = ArgumentParser(description="Leave P Group(s) In task")
+    parser = ArgumentParser(description="Leave P Group(s) Out task")
     parser.add_argument("p", type=int,
                         help="p groups to leave")
     parser.add_argument("coco_file", type=str,
                         help="coco file path")
-    parser.add_argument("--seed", type=int, default=1000,
-                        help="random seed")
     args = parser.parse_args(args=args)
 
     kw = vars(args)
@@ -144,31 +142,33 @@ def _main(args=None):
     if args is None:
         args = sys.argv[1:]
 
-    if args[0] == "coco":
+    task, *args = args
+
+    if task == "coco":
         kw = args_coco_build(args)
         return coco_build(**kw)
-    elif args[0] == "coco2yolo":
+    elif task == "coco2yolo":
         kw = args_coco_to_yolo(args)
         return coco_to_yolo(**kw)
-    elif args[0] == "coco4ks":
+    elif task == "coco4kps":
         kw = args_coco_keep_p_sample(args)
         p = kw.pop("p")
         return KeepPSamplesIn(p).split(**kw)
-    elif args[0] == "coco4lg":
+    elif task == "coco4lpg":
         kw = args_coco_leave_p_group(args)
         p = kw.pop("p")
         return LeavePGroupsOut(p).split(**kw)
-    elif args[0] == "patch":
+    elif task == "patch":
         kw = args_patch_images(args)
         return patch_images(**kw)
-    elif args[0] == "viz-coco":
+    elif task == "viz-coco":
         kw = args_display_coco(args)
         return display_coco(**kw)
-    elif args[0] == "viz-test":
+    elif task == "viz-test":
         kw = args_display_test(args)
         return display_test(**kw)
     else:
-        command = ["coco", "coco2yolo", "coco4ks", "coco4lg",
+        command = ["coco", "coco2yolo", "coco4kps", "coco4lpg",
                    "patch", "viz-coco", "viz-test"]
         raise NotImplementedError(f"Not supported: {args}\ncommand: {command}")
 

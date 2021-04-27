@@ -27,10 +27,10 @@ class KeepPSamplesIn(object):
         """Keep P Sample(s) In task
 
         Args:
-            p (int, float): Number of samples (``p``) to keep
+            p (int, float): Number of samples to keep
         """
         assert isinstance(p, (int, float)) and (p > 0)
-        self.p = p
+        self.p_samples = int(p) if p > 1.0 else p
 
     def split(self, coco_file, stratified=True, seed=1000):
         coco = load_json(coco_file)
@@ -76,7 +76,7 @@ class KeepPSamplesIn(object):
         for _, image_ids in groups.items():
             image_ids = sorted(image_ids)
 
-            p = self.p
+            p = self.p_samples
             if isinstance(p, float):
                 p = 1 + int(p * len(image_ids))
 
@@ -93,15 +93,15 @@ class KeepPSamplesIn(object):
 
 class LeavePGroupsOut(object):
 
-    def __init__(self, p_groups):
-        """Leave P Group(s) Out cross-validator
+    def __init__(self, p):
+        """Leave P Group(s) Out task
 
         Args:
-            p_groups (int): Number of groups (``p``) to leave out
+            p (int): Number of groups to leave
         """
-        self.p_groups = p_groups
+        self.p_groups = p
 
-    def split(self, coco_file, seed=1000):
+    def split(self, coco_file):
         coco = load_json(coco_file)
         out_dir = Path(coco_file).parent
         out_dir = out_dir / "leave_p_groups"
@@ -117,11 +117,11 @@ class LeavePGroupsOut(object):
             row = img_index[a["image_id"]]
             flags[row, col] = 1
 
-        for i, test_index in enumerate(self._iter_test_masks(flags), 1):
-            self._split(coco, out_dir / f"{i:02d}", test_index, seed * i)
+        for i, train_index in enumerate(self._iter_train_masks(flags), 1):
+            self._split(coco, out_dir / f"{i:02d}", train_index)
         return str(out_dir)
 
-    def _iter_test_masks(self, flags):
+    def _iter_train_masks(self, flags):
         groups = flags.sum(axis=0).nonzero()[0]
 
         n_groups = len(groups)
@@ -130,11 +130,11 @@ class LeavePGroupsOut(object):
                 f"p_groups({self.p_groups}) not less than unique_groups({n_groups})")
 
         for indices in combinations(groups, self.p_groups):
-            yield flags[:, indices].sum(axis=1) >= 1
+            yield flags[:, indices].sum(axis=1) == 0
 
-    def _split(self, coco, this_dir, test_index, seed):
+    def _split(self, coco, this_dir, train_index):
         this_dir = make_dir(this_dir)
-        train_index = np.logical_not(test_index)
+        test_index = np.logical_not(train_index)
         image_ids = np.asarray([img["id"] for img in coco["images"]])
 
         test_index = image_ids[test_index]
