@@ -34,7 +34,7 @@ def _patch_image(out_dir, img_path, patch_size, overlap=128, color_mode=1):
             cnt += 1
 
 
-def patch_dataset(img_dir, out_dir, patch_size, overlap=128, color_mode=1):
+def patch_images(img_dir, out_dir, patch_size, overlap=128, color_mode=1):
     img_dir, out_dir = Path(img_dir), Path(out_dir)
     shutil.rmtree(out_dir, ignore_errors=True)
     out_dir.mkdir(parents=True)

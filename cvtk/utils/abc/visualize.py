@@ -77,7 +77,7 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
     return str(output_dir)
 
 
-def display_result(results, score_thr, output_dir, **kw):
+def display_test(results, score_thr, output_dir, **kw):
     simple = kw.get("simple", True)
     include = kw.get("include", None)
     clean_mode = kw.get("clean_mode", "min")

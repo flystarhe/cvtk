@@ -25,7 +25,7 @@ def best_iou(w, h, anchors, ratios):
     return max(data)
 
 
-def hip_bbox(coco_file, crop_size, scales=[8], ratios=[0.5, 1.0, 2.0], base_sizes=[4, 8, 16, 32, 64]):
+def hip_coco(coco_file, crop_size, scales=[8], ratios=[0.5, 1.0, 2.0], base_sizes=[4, 8, 16, 32, 64]):
     anchors = [s * x for s in scales for x in base_sizes]
 
     coco = load_json(coco_file)
@@ -42,7 +42,7 @@ def hip_bbox(coco_file, crop_size, scales=[8], ratios=[0.5, 1.0, 2.0], base_size
     return "jupyter.hiplot"
 
 
-def hip_result(results, score_thr, **kw):
+def hip_test(results, score_thr, **kw):
     """Show model prediction results, allow gt is empty.
 
     Args:
