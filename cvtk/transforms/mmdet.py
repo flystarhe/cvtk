@@ -1,5 +1,4 @@
-"""Transforms for mmdet2.x
-"""
+"""Transforms for mmdet2.x"""
 from collections import defaultdict
 
 import cv2 as cv
@@ -18,7 +17,8 @@ class RandomCrop(object):
         uint8,
     """
 
-    def __init__(self, height, width, **kw):
+    def __init__(self, height, width, seed=1234, **kw):
+        self.rng = np.random.default_rng(seed)
         area = (height * width) * 0.5
         self.nonignore = area
         self.height = height
@@ -29,12 +29,12 @@ class RandomCrop(object):
         for index, label in enumerate(labels):
             counter[label].append(index)
 
-        key = np.random.choice(list(counter.keys()))
-        return np.random.choice(counter[key])
+        key = self.rng.choice(list(counter.keys()))
+        return self.rng.choice(counter[key])
 
     def _get_patch(self, x_min, y_min, x_max, y_max, x_pad, y_pad):
-        x0 = np.random.randint(x_min - x_pad, x_max + x_pad - self.width)
-        y0 = np.random.randint(y_min - y_pad, y_max + y_pad - self.height)
+        x0 = self.rng.integers(x_min - x_pad, x_max + x_pad - self.width)
+        y0 = self.rng.integers(y_min - y_pad, y_max + y_pad - self.height)
         return x0, y0, x0 + self.width, y0 + self.height
 
     def _crop_and_paste(self, img, patch):
@@ -84,7 +84,8 @@ class RandomCrop(object):
         return ss * inner, np.logical_not(ss) * inner
 
     def __call__(self, results):
-        img, bboxes, labels = [results[k] for k in ("img", "gt_bboxes", "gt_labels")]
+        img, bboxes, labels = [results[k]
+                               for k in ("img", "gt_bboxes", "gt_labels")]
         img_h, img_w, img_c = img.shape
         assert img_c == 3
 
@@ -100,8 +101,9 @@ class RandomCrop(object):
             cx, cy = self.width // 2, self.height // 2
             x1, y1, x2, y2 = cx - 32, cy - 32, cx + 32, cy + 32
             dst_img[y1: y2, x1: x2] = dst_img[y1: y2, x1: x2] + 128
-            dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)  # man-made object
-            dst_labels = np.array([0], dtype=np.int64)  # set the man-made object category in 1st
+            dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)
+            # set the man-made object category in 1st group
+            dst_labels = np.array([0], dtype=np.int64)
 
             results["img"] = dst_img
             results["img_shape"] = dst_img.shape
@@ -137,12 +139,20 @@ class RandomCrop(object):
 
 class Resize2(object):
 
-    def __init__(self, test_mode=False, ratio_range=(0.8, 1.2), **kw):
+    def __init__(self, test_mode=False, img_scale=None, ratio_range=None, force_square=False, seed=1234, **kw):
+        # img_scale (list[tuple]), ratio_range (tuple[float]): (min_ratio, max_ratio)
         self.test_mode = test_mode
+        self.img_scale = img_scale
         self.ratio_range = ratio_range
+        self.force_square = force_square
+        self.rng = np.random.default_rng(seed)
 
     def __call__(self, results):
         img = results["img"]
+
+        if self.force_square:
+            min_hw = min(img.shape[:2])
+            img = img[:min_hw, :min_hw, :]
 
         if self.test_mode:
             results["img_shape"] = img.shape
@@ -152,11 +162,19 @@ class Resize2(object):
             return results
 
         h, w = img.shape[:2]
-        a, b = self.ratio_range
-
-        scale_factor = (b - a) * np.random.random_sample() + a
-        new_size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
-        img = cv.resize(img, new_size, dst=None, interpolation=cv.INTER_LINEAR)
+        img_scale = self.img_scale
+        ratio_range = self.ratio_range
+        if img_scale is not None:
+            n = len(img_scale)
+            index = self.rng.integers(n)
+            new_h, new_w = img_scale[index]
+            scale_factor = min(new_h / h, new_w / w)
+            size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
+            img = cv.resize(img, size, dst=None, interpolation=cv.INTER_LINEAR)
+        elif ratio_range is not None:
+            scale_factor = self.rng.uniform(*ratio_range)
+            size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
+            img = cv.resize(img, size, dst=None, interpolation=cv.INTER_LINEAR)
 
         results["img"] = img
         results["img_shape"] = img.shape
