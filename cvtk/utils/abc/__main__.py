@@ -3,7 +3,8 @@ import sys
 from argparse import ArgumentParser
 
 from cvtk.utils.abc.coco.build import make_dataset as coco_build
-from cvtk.utils.abc.coco.coco2yolo import yolo_from_coco as coco2yolo
+from cvtk.utils.abc.coco.yolo import yolo_from_coco as coco_to_yolo
+from cvtk.utils.abc.coco.sampling import KeepPSamplesIn, LeavePGroupsOut
 from cvtk.utils.abc.patch import patch_images
 from cvtk.utils.abc.visualize import display_coco, display_test
 
@@ -37,12 +38,42 @@ def args_coco_build(args=None):
     return kw
 
 
-def args_coco2yolo(args=None):
+def args_coco_to_yolo(args=None):
     parser = ArgumentParser(description="yolo from coco")
     parser.add_argument("coco_dir", type=str,
                         help="dataset root dir")
     parser.add_argument("json_dir", type=str,
                         help="coco file dir")
+    args = parser.parse_args(args=args)
+
+    kw = vars(args)
+    return kw
+
+
+def args_coco_keep_p_sample(args=None):
+    parser = ArgumentParser(description="Keep P Sample(s) In task")
+    parser.add_argument("p", type=float,
+                        help="p samples to keep")
+    parser.add_argument("coco_file", type=str,
+                        help="coco file path")
+    parser.add_argument("--stratified", action="store_true",
+                        help="stratified or not")
+    parser.add_argument("--seed", type=int, default=1000,
+                        help="random seed")
+    args = parser.parse_args(args=args)
+
+    kw = vars(args)
+    return kw
+
+
+def args_coco_leave_p_group(args=None):
+    parser = ArgumentParser(description="Leave P Group(s) In task")
+    parser.add_argument("p", type=int,
+                        help="p groups to leave")
+    parser.add_argument("coco_file", type=str,
+                        help="coco file path")
+    parser.add_argument("--seed", type=int, default=1000,
+                        help="random seed")
     args = parser.parse_args(args=args)
 
     kw = vars(args)
@@ -117,8 +148,16 @@ def _main(args=None):
         kw = args_coco_build(args)
         return coco_build(**kw)
     elif args[0] == "coco2yolo":
-        kw = args_coco2yolo(args)
-        return coco2yolo(**kw)
+        kw = args_coco_to_yolo(args)
+        return coco_to_yolo(**kw)
+    elif args[0] == "coco4ks":
+        kw = args_coco_keep_p_sample(args)
+        p = kw.pop("p")
+        return KeepPSamplesIn(p).split(**kw)
+    elif args[0] == "coco4lg":
+        kw = args_coco_leave_p_group(args)
+        p = kw.pop("p")
+        return LeavePGroupsOut(p).split(**kw)
     elif args[0] == "patch":
         kw = args_patch_images(args)
         return patch_images(**kw)
@@ -129,7 +168,8 @@ def _main(args=None):
         kw = args_display_test(args)
         return display_test(**kw)
     else:
-        command = "coco,coco2yolo,patch,viz-coco,viz-test".split(",")
+        command = ["coco", "coco2yolo", "coco4ks", "coco4lg",
+                   "patch", "viz-coco", "viz-test"]
         raise NotImplementedError(f"Not supported: {args}\ncommand: {command}")
 
 
