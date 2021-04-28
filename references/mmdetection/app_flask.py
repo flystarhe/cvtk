@@ -1,4 +1,3 @@
-import gc
 import sys
 
 from flask import Flask, jsonify, request
@@ -18,8 +17,6 @@ def predict():
         image = request.form["image"]
         output = inference_detector(my_model, image)
         results = {"status": 0, "data": str(output)}
-        if request.form.get("gc", "n") == "y":
-            gc.collect()
     except Exception:
         results = {"status": 1}
     return jsonify(results)

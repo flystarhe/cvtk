@@ -46,7 +46,9 @@ class GaussNoise(object):
                 raise ValueError("var_limit should be non negative.")
             self.var_limit = (0, var_limit)
         else:
-            raise TypeError(f"Expected var_limit type to be one of (int, float, tuple, list), got {type(var_limit)}")
+            raise TypeError(
+                f"Expected var_limit type to be one of (int, float, tuple, list), got {type(var_limit)}"
+            )
 
         self.mean = mean
 
@@ -144,7 +146,9 @@ class PeakNoise(object):
                 raise ValueError("var_limit should be non negative.")
             self.var_limit = (0, var_limit)
         else:
-            raise TypeError(f"Expected var_limit type to be one of (int, float, tuple, list), got {type(var_limit)}")
+            raise TypeError(
+                f"Expected var_limit type to be one of (int, float, tuple, list), got {type(var_limit)}"
+            )
 
     def __call__(self, image):
         img_h, img_w, img_c = image.shape

@@ -1,4 +1,3 @@
-import gc
 import sys
 
 import tornado.ioloop
@@ -13,8 +12,6 @@ class MainHandler(tornado.web.RequestHandler):
             image = self.get_argument("image")
             output = inference_detector(my_model, image)
             results = {"status": 0, "data": str(output)}
-            if self.get_argument("gc", "n") == "y":
-                gc.collect()
         except Exception:
             results = {"status": 1}
         self.finish(results)

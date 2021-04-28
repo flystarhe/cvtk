@@ -1,10 +1,12 @@
 # https://github.com/pytorch/vision/blob/master/references/classification/utils.py#L259
-from collections import OrderedDict
-from pathlib import Path
 import copy
 import re
 import sys
+from collections import OrderedDict
+from pathlib import Path
+
 import torch
+from torch.serialization import default_restore_location
 
 
 def average_checkpoints(inputs):
@@ -26,7 +28,7 @@ def average_checkpoints(inputs):
             state = torch.load(
                 f,
                 map_location=(
-                    lambda s, _: torch.serialization.default_restore_location(s, "cpu")
+                    lambda s, _: default_restore_location(s, "cpu")
                 ),
             )
         # Copies over the settings from the first checkpoint
