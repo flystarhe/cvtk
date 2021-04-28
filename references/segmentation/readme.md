@@ -1,9 +1,9 @@
 # Semantic segmentation reference training scripts
-Tested on `pytorch:1.7.1`.
+Tested on `pytorch:1.8.1`.
 
 ## docker
 * python: 3.8
-* pytorch: 1.7.1
+* pytorch: 1.8.1
 
 ```sh
 docker pull flystarhe/torch:1.8.1-cuda10.2-dev
@@ -12,14 +12,16 @@ docker tag flystarhe/torch:1.8.1-cuda10.2-dev torch:1.8.1-cuda10.2-dev
 docker save -o torch1.8.1-cuda10.2-dev.tar torch:1.8.1-cuda10.2-dev
 docker load -i torch1.8.1-cuda10.2-dev.tar
 
-t=torch18_cu10 && docker run --gpus all -d -p 7000:9000 --ipc=host --name ${t} -v "$(pwd)"/${t}:/workspace torch:1.8.1-cuda10.2-dev
+n=torch18_cu10
+t=torch:1.8.1-cuda10.2-dev
+docker run --gpus all -d -p 7000:9000 --ipc=host --name ${n} -v "$(pwd)"/${n}:/workspace ${t}
 ```
 
 ## training scripts
 Assume `git clone https://github.com/flystarhe/cvtk.git /workspace/cvtk`. you must modify the following flags:
 
 * `--nproc_per_node=<number_of_gpus_available>`
-* models: `fcn_resnet50,fcn_resnet101,deeplabv3_resnet50,deeplabv3_resnet101`
+* models: `fcn_resnet50,deeplabv3_resnet50,lraspp_mobilenet_v3_large`
 
 ```jupyter
 import os

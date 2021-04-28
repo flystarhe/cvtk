@@ -13,7 +13,7 @@ def _mask_top_by_full(roi: Tensor, k: int = 1):
     """
     flattened = torch.flatten(roi, start_dim=0, end_dim=-1)
     val = torch.topk(flattened, k, dim=-1)[0][-1]
-    return torch.ge(roi, val)
+    return torch.gt(roi, val * 0.95)
 
 
 def _mask_top_by_grid(roi: Tensor, k: int = 1):
@@ -31,7 +31,7 @@ def _mask_top_by_grid(roi: Tensor, k: int = 1):
         flattened = torch.flatten(output)
         val = torch.topk(flattened, max(output.shape), dim=-1)[0][-1]
         output = F.interpolate(output, size=roi.shape, align_corners=False)
-        return torch.ge(output, val)
+        return torch.gt(output, val * 0.95)
 
     return _mask_top_by_full(roi, k=max(roi.shape))
 
@@ -43,7 +43,7 @@ def _mask_top_by_line_h(roi: Tensor, k: int = 1):
         roi (Tensor[H, W]): input tensor.
     """
     mat = torch.topk(roi, k, dim=0)[0][-1:, :]
-    return torch.ge(roi, mat)
+    return torch.gt(roi, mat * 0.95)
 
 
 def _mask_top_by_line_w(roi: Tensor, k: int = 1):
@@ -53,7 +53,7 @@ def _mask_top_by_line_w(roi: Tensor, k: int = 1):
         roi (Tensor[H, W]): input tensor.
     """
     mat = torch.topk(roi, k, dim=1)[0][:, -1:]
-    return torch.ge(roi, mat)
+    return torch.gt(roi, mat * 0.95)
 
 
 def _mask_top_by_line(roi: Tensor, k: int = 1):

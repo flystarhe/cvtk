@@ -8,19 +8,20 @@ from torch.nn import functional as F
 
 def draw_bbox(npimg, bboxes, labels):
     if labels is None:
-        labels = ["1"] * len(bboxes)
+        labels = ["FG"] * len(bboxes)
     npimg = np.ascontiguousarray(npimg)
     for bbox, label in zip(bboxes, labels):
-        x1, y1, x2, y2 = list(map(int, bbox))
+        x1, y1, x2, y2 = map(int, bbox)
         cv.rectangle(npimg, (x1, y1), (x2, y2), (0, 0, 255), thickness=2)
-        cv.putText(npimg, f"{label}", (x1, y1), cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
+        cv.putText(npimg, f"{label}", (x1, y1),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
     return npimg
 
 
 def display_image(image, output, target, save_to):
     # image, output as `Tensor[N, C, H, W]`
     image, output, target = image[0], output[0], target[0]
-    output = F.softmax(output, dim=0)[0]  # p of prediction as background
+    output = F.softmax(output, dim=0)[0]  # p of prediction as BG
 
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
