@@ -7,8 +7,10 @@ import numpy as np
 from cvtk.io import load_json
 from torchvision.transforms import functional as F
 
+a_min, a_max = 32**2, 96**2
 
-def check_bboxes(src_bboxes, dst_bboxes, nonignore):
+
+def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
     src_w = src_bboxes[:, 2] - src_bboxes[:, 0]
     src_h = src_bboxes[:, 3] - src_bboxes[:, 1]
     src_area = src_w * src_h
@@ -17,12 +19,14 @@ def check_bboxes(src_bboxes, dst_bboxes, nonignore):
     dst_h = dst_bboxes[:, 3] - dst_bboxes[:, 1]
     dst_area = dst_w * dst_h
 
-    x = np.where(src_area > 96**2, 0.5, 1.0 - 1e-5)
+    x = np.clip(src_area, a_min, a_max)
+    x = (x - a_min) / (a_max - a_min)
+    x = 1.0 - 0.5 * x - 1e-5
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
-    s3 = (dst_w >= src_w) * (dst_h >= src_w * 2)
-    s4 = (dst_h >= src_h) * (dst_w >= src_h * 2)
+    s3 = (dst_w >= src_w - 1) * (dst_h >= src_w * 2)
+    s4 = (dst_h >= src_h - 1) * (dst_w >= src_h * 2)
     ss = s1 + s2 + s3 + s4
 
     inner = (dst_w >= 4) * (dst_h >= 4)
@@ -32,22 +36,25 @@ def check_bboxes(src_bboxes, dst_bboxes, nonignore):
 class ToyDataset:
 
     def __init__(self, data_root, coco_file, single_cls=True, crop_size=480, phase="train"):
+        nonignore = crop_size * crop_size * 0.5
         self._ann_file = Path(data_root) / coco_file
         self._img_prefix = Path(data_root)
         self._single_cls = single_cls
         self._crop_size = crop_size
-        self._safe = crop_size**2
+        self._safe = nonignore
         self._phase = phase
 
         if phase == "train":
             self.transforms = A.Compose([
-                A.SmallestMaxSize(max_size=crop_size + 32, interpolation=cv.INTER_LINEAR, p=1.0),
+                A.SmallestMaxSize(max_size=crop_size + 32,
+                                  interpolation=cv.INTER_LINEAR, p=1.0),
                 A.RandomBrightnessContrast(p=0.2),
                 A.Flip(p=0.5),
             ], bbox_params=A.BboxParams(format="pascal_voc", label_fields=["labels"]))
         else:
             self.transforms = A.Compose([
-                A.SmallestMaxSize(max_size=crop_size + 32, interpolation=cv.INTER_LINEAR, p=1.0),
+                A.SmallestMaxSize(max_size=crop_size + 32,
+                                  interpolation=cv.INTER_LINEAR, p=1.0),
             ], bbox_params=A.BboxParams(format="pascal_voc", label_fields=["labels"]))
 
         self.mean = [0.485, 0.456, 0.406]
@@ -115,8 +122,8 @@ class ToyDataset:
             bboxes -= np.asarray([x1, y1, x1, y1])
             image = image[y1: y2, x1: x2]
 
-            dst_mask, drop_mask = check_bboxes(old_bboxes, bboxes, self._safe * 0.5)
-            for x1, y1, x2, y2 in bboxes[drop_mask].tolist():
+            dst_mask, drop_mask = _check_bboxes(old_bboxes, bboxes, self._safe)
+            for x1, y1, x2, y2 in bboxes[drop_mask].astype(np.int64).tolist():
                 image[y1: y2, x1: x2] = 0
 
             bboxes = bboxes[dst_mask].tolist()
@@ -147,7 +154,8 @@ class ToyDataset:
 
         image = F.to_tensor(image)  # \in [0, 1]
         image = F.normalize(image, self.mean, self.std, True)
-        target = dict(id=image_id, bboxes=bboxes, labels=labels, img_shape=list(image.size()))
+        target = dict(id=image_id, bboxes=bboxes, labels=labels,
+                      img_shape=list(image.size()))
         return image, target
 
     def __len__(self):

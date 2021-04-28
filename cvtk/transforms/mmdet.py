@@ -4,6 +4,31 @@ from collections import defaultdict
 import cv2 as cv
 import numpy as np
 
+a_min, a_max = 32**2, 96**2
+
+
+def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
+    src_w = src_bboxes[:, 2] - src_bboxes[:, 0]
+    src_h = src_bboxes[:, 3] - src_bboxes[:, 1]
+    src_area = src_w * src_h
+
+    dst_w = dst_bboxes[:, 2] - dst_bboxes[:, 0]
+    dst_h = dst_bboxes[:, 3] - dst_bboxes[:, 1]
+    dst_area = dst_w * dst_h
+
+    x = np.clip(src_area, a_min, a_max)
+    x = (x - a_min) / (a_max - a_min)
+    x = 1.0 - 0.5 * x - 1e-5
+
+    s1 = (dst_area >= nonignore)
+    s2 = (dst_area >= src_area * x)
+    s3 = (dst_w >= src_w - 1) * (dst_h >= src_w * 2)
+    s4 = (dst_h >= src_h - 1) * (dst_w >= src_h * 2)
+    ss = s1 + s2 + s3 + s4
+
+    inner = (dst_w >= 4) * (dst_h >= 4)
+    return ss * inner, np.logical_not(ss) * inner
+
 
 class RandomCrop(object):
     """Crop a random part of the input.
@@ -19,7 +44,7 @@ class RandomCrop(object):
 
     def __init__(self, height, width, seed=1234, **kw):
         self.rng = np.random.default_rng(seed)
-        area = (height * width) * 0.5
+        area = height * width * 0.5
         self.nonignore = area
         self.height = height
         self.width = width
@@ -62,27 +87,6 @@ class RandomCrop(object):
         bboxes -= np.tile(patch[:2], 2)
         return bboxes
 
-    def _check_bboxes(self, src_bboxes, dst_bboxes):
-        src_w = src_bboxes[:, 2] - src_bboxes[:, 0]
-        src_h = src_bboxes[:, 3] - src_bboxes[:, 1]
-        src_area = src_w * src_h
-
-        dst_w = dst_bboxes[:, 2] - dst_bboxes[:, 0]
-        dst_h = dst_bboxes[:, 3] - dst_bboxes[:, 1]
-        dst_area = dst_w * dst_h
-
-        inner = (dst_w >= 4) * (dst_h >= 4) * (dst_area >= 48)
-        x = np.clip(np.sqrt(src_area), 32, None)
-        x = 0.5 + 0.5 * 32 / x - 1e-5
-
-        s1 = (dst_area >= src_area * x)
-        s2 = (dst_area >= self.nonignore)
-        s3 = (dst_w >= src_w) * (dst_h >= src_w * 2.0)
-        s4 = (dst_h >= src_h) * (dst_w >= src_h * 2.0)
-        ss = s1 + s2 + s3 + s4
-
-        return ss * inner, np.logical_not(ss) * inner
-
     def __call__(self, results):
         img, bboxes, labels = [results[k]
                                for k in ("img", "gt_bboxes", "gt_labels")]
@@ -100,9 +104,10 @@ class RandomCrop(object):
 
             cx, cy = self.width // 2, self.height // 2
             x1, y1, x2, y2 = cx - 32, cy - 32, cx + 32, cy + 32
-            dst_img[y1: y2, x1: x2] = dst_img[y1: y2, x1: x2] + 128
-            dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)
+
+            dst_img[y1: y2, x1: x2] = (255, 0, 0)
             # set the man-made object category in 1st group
+            dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)
             dst_labels = np.array([0], dtype=np.int64)
 
             results["img"] = dst_img
@@ -121,9 +126,10 @@ class RandomCrop(object):
         patch = self._get_patch(x_min, y_min, x_max, y_max, x_pad, y_pad)
 
         dst_img = self._crop_and_paste(img, patch)
+
         dst_bboxes = self._clip_bboxes(bboxes.copy(), patch)
-        dst_mask, drop_mask = self._check_bboxes(bboxes, dst_bboxes)
-        for x1, y1, x2, y2 in dst_bboxes[drop_mask].astype(np.int64):
+        dst_mask, drop_mask = _check_bboxes(bboxes, dst_bboxes, self.nonignore)
+        for x1, y1, x2, y2 in dst_bboxes[drop_mask].astype(np.int64).tolist():
             dst_img[y1: y2, x1: x2] = 0
         dst_bboxes = dst_bboxes[dst_mask]
         dst_labels = labels[dst_mask]
@@ -188,5 +194,6 @@ class Resize2(object):
         bboxes = bboxes * results["scale_factor"]
         bboxes[:, 0::2] = np.clip(bboxes[:, 0::2], 0, img_shape[1])
         bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, img_shape[0])
-        results["gt_bboxes"] = bboxes
+        mask = (bboxes[:, 0] < bboxes[:, 2]) * (bboxes[:, 1] < bboxes[:, 3])
+        results["gt_bboxes"] = bboxes[mask]
         return results
