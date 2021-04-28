@@ -119,7 +119,7 @@ def copyfile(out_dir, img_path, out_path, del_shapes):
     return str(cur_file.relative_to(out_dir))
 
 
-def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None):
+def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None, min_size=0):
     imdb = make_imdb(img_dir, ann_dir, include)
 
     if out_dir is not None:
@@ -178,6 +178,12 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                 bbox = _norm([x_min, y_min, w, h], img_w, img_h)
             else:
                 raise NotImplementedError(f"Not Implemented: {shape_type}")
+
+            if min(bbox[2:]) < 3:
+                continue
+
+            w = max(min_size, w)
+            h = max(min_size, h)
 
             if label in DEL_LABELS:
                 del_shapes.append(bbox)

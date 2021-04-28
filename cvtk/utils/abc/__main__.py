@@ -23,11 +23,13 @@ def args_coco_build(args=None):
     parser.add_argument("-a", "--ann_dir", type=str, default=None,
                         help="labels dir, search annotation from here")
     parser.add_argument("-o", "--out_dir", type=str, default=None,
-                        help="output dir, default save to {img_dir}_coco")
+                        help="output dir, default save to `{img_dir}_coco`")
     parser.add_argument("-i", "--include", type=str, default=None,
                         help="filter dataset, hiplot(*.csv), coco(*.json) or dir(path/)")
     parser.add_argument("-m", "--mapping", type=str, default=None,
                         help="python dict, be run `eval(mapping)`")
+    parser.add_argument("-e", "--min_size", type=int, default=0,
+                        help="expand mini box to `min_size`")
     args = parser.parse_args(args=args)
 
     kw = vars(args)
@@ -124,7 +126,7 @@ def args_display_test(args=None):
                         help="python dict, be run `eval(score_thr)`")
     parser.add_argument("output_dir", type=str,
                         help="output dir")
-    parser.add_argument("-m", "--options", type=str, default=None,
+    parser.add_argument("-o", "--options", type=str, default=None,
                         help="python dict, be run `eval(options)`")
     args = parser.parse_args(args=args)
 
