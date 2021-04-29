@@ -191,7 +191,7 @@ def _main(args=None):
         kw = args_display_test(args)
         return display_test(**kw)
     else:
-        print("Not supported: {args}\n", help_doc_str)
+        print(f"Not supported: {args}\n", help_doc_str)
         return "-1"
 
 
