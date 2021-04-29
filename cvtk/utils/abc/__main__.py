@@ -191,10 +191,8 @@ def _main(args=None):
         return display_test(**kw)
     elif task == "-h" or task == "--help":
         print("usage: python -m cvtk.utils.abc command ...\n", help_doc_str)
-        return "-1"
     else:
         print(f"unimplemented command: {task}\n", help_doc_str)
-        return "-1"
 
 
 # develop:
