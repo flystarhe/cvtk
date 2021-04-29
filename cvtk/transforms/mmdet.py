@@ -161,6 +161,7 @@ class Resize2(object):
             img = img[:min_hw, :min_hw, :]
 
         if self.test_mode:
+            results["img"] = img
             results["img_shape"] = img.shape
             results["pad_shape"] = img.shape
             results["scale_factor"] = 1.0
@@ -181,6 +182,8 @@ class Resize2(object):
             scale_factor = self.rng.uniform(*ratio_range)
             size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
             img = cv.resize(img, size, dst=None, interpolation=cv.INTER_LINEAR)
+        else:
+            scale_factor = 1.0
 
         results["img"] = img
         results["img_shape"] = img.shape
@@ -189,6 +192,7 @@ class Resize2(object):
         results["keep_ratio"] = True
 
         # resize bboxes
+        labels = results["gt_labels"]
         bboxes = results["gt_bboxes"]
         img_shape = results["img_shape"]
         bboxes = bboxes * results["scale_factor"]
@@ -196,4 +200,5 @@ class Resize2(object):
         bboxes[:, 1::2] = np.clip(bboxes[:, 1::2], 0, img_shape[0])
         mask = (bboxes[:, 0] < bboxes[:, 2]) * (bboxes[:, 1] < bboxes[:, 3])
         results["gt_bboxes"] = bboxes[mask]
+        results["gt_labels"] = labels[mask]
         return results
