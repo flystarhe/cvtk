@@ -119,7 +119,7 @@ def copyfile(out_dir, img_path, out_path, del_shapes):
     return str(cur_file.relative_to(out_dir))
 
 
-def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None, min_size=0):
+def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None, min_size=0, all_imgs=True):
     imdb = make_imdb(img_dir, ann_dir, include)
 
     if out_dir is not None:
@@ -146,6 +146,8 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
 
         if len(shapes) == 0:
             print(f"none-shapes: {img_path}")
+            if not all_imgs:
+                continue
 
         img_id += 1
         del_shapes = []
@@ -206,5 +208,6 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     cats = [dict(id=i, name=name, supercategory="")
             for i, name in enumerate(labels)]
     coco = dict(images=imgs, annotations=anns, categories=cats)
+    print(f"imgs: {len(imgs)}, anns: {len(anns)}\nlabels: {labels}")
     save_json(coco, out_dir / "coco.json")
     return str(out_dir)

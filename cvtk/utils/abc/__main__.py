@@ -30,6 +30,8 @@ def args_coco_build(args=None):
                         help="python dict, be run `eval(mapping)`")
     parser.add_argument("-e", "--min_size", type=int, default=0,
                         help="expand mini box to `min_size`")
+    parser.add_argument("--all-imgs", action="store_true",
+                        help="keep none-shapes image")
     args = parser.parse_args(args=args)
 
     kw = vars(args)
@@ -119,7 +121,7 @@ def args_display_coco(args=None):
 
 
 def args_display_test(args=None):
-    parser = ArgumentParser(description="display coco")
+    parser = ArgumentParser(description="display test")
     parser.add_argument("results", type=str,
                         help="path of pkl file")
     parser.add_argument("score_thr", type=str,
@@ -140,11 +142,30 @@ def args_display_test(args=None):
     return kw
 
 
+help_doc_str = """
+Options:
+
+positional arguments:
+    command
+        coco
+        coco2yolo
+        coco4kps
+        coco4lpg
+        patch
+        viz-coco
+        viz-test
+"""
+
+
 def _main(args=None):
     if args is None:
         args = sys.argv[1:]
 
-    task, *args = args
+    if len(args) >= 1:
+        task, *args = args
+    else:
+        print("usage: python -m cvtk.utils.abc command ...\n", help_doc_str)
+        return "-1"
 
     if task == "coco":
         kw = args_coco_build(args)
@@ -170,9 +191,8 @@ def _main(args=None):
         kw = args_display_test(args)
         return display_test(**kw)
     else:
-        command = ["coco", "coco2yolo", "coco4kps", "coco4lpg",
-                   "patch", "viz-coco", "viz-test"]
-        raise NotImplementedError(f"Not supported: {args}\ncommand: {command}")
+        print("Not supported: {args}\n", help_doc_str)
+        return "-1"
 
 
 # develop:

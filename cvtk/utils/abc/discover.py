@@ -25,7 +25,18 @@ def best_iou(w, h, anchors, ratios):
     return max(data)
 
 
-def hip_coco(coco_file, crop_size, scales=[8], ratios=[0.5, 1.0, 2.0], base_sizes=[4, 8, 16, 32, 64]):
+def split_file_name(data, n=1):
+    if "file_name" not in data[0]:
+        return data
+
+    def _split(file_name):
+        parts = file_name.split("/")[:-1][-n:]
+        return {f"l{i}": p for i, p in enumerate(parts, 1)}
+
+    return [{**d, **_split(d["file_name"])} for d in data]
+
+
+def hip_coco(coco_file, crop_size, scales=[8], ratios=[0.5, 1.0, 2.0], base_sizes=[4, 8, 16, 32, 64], splits=0):
     anchors = [s * x for s in scales for x in base_sizes]
 
     coco = load_json(coco_file)
@@ -38,11 +49,13 @@ def hip_coco(coco_file, crop_size, scales=[8], ratios=[0.5, 1.0, 2.0], base_size
                      "h_ratio": h / w, "h_ratio_log2": np.log2(h / w),
                      "area": w * h, "min_size": min(w, h)})
 
+    if splits > 0:
+        data = split_file_name(data, splits)
     hip.Experiment.from_iterable(data).display()
     return "jupyter.hiplot"
 
 
-def hip_test(results, score_thr, **kw):
+def hip_test(results, score_thr, splits=0, **kw):
     """Show model prediction results, allow gt is empty.
 
     Args:
@@ -63,6 +76,7 @@ def hip_test(results, score_thr, **kw):
               if d["score"] >= get_val(score_thr, d["label"], 0.3)]
         dt = nms.clean_by_bbox(dt, clean_mode, clean_param)
         ious = nms.bbox_overlaps(dt, gt, match_mode)
+        file_name = str(file_name)
 
         exclude_i = set()
         exclude_j = set()
@@ -91,7 +105,12 @@ def hip_test(results, score_thr, **kw):
                 b = [g["label"], g["score"]] + g["bbox"][2:]
                 vals.append([file_name, 0.] + a + b)
 
-    names = "fn,iou,label,score,w,h,gt_label,gt_score,gt_w,gt_h".split(",")
+    names = ["file_name", "iou",
+             "label", "score", "w", "h",
+             "gt_label", "gt_score", "gt_w", "gt_h"]
     data = [{a: b for a, b in zip(names, val)} for val in vals]
+
+    if splits > 0:
+        data = split_file_name(data, splits)
     hip.Experiment.from_iterable(data).display()
     return "jupyter.hiplot"
