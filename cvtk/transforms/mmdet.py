@@ -143,7 +143,7 @@ class RandomCrop(object):
         return results
 
 
-class Resize2(object):
+class Resize(object):
 
     def __init__(self, test_mode=False, img_scale=None, ratio_range=None, force_square=False, seed=1234, **kw):
         # img_scale (list[tuple]), ratio_range (tuple[float]): (min_ratio, max_ratio)
@@ -163,6 +163,7 @@ class Resize2(object):
         if self.test_mode:
             results["img"] = img
             results["img_shape"] = img.shape
+            results["ori_shape"] = img.shape
             results["pad_shape"] = img.shape
             results["scale_factor"] = 1.0
             results["keep_ratio"] = True
@@ -187,6 +188,7 @@ class Resize2(object):
 
         results["img"] = img
         results["img_shape"] = img.shape
+        results["ori_shape"] = img.shape
         results["pad_shape"] = img.shape
         results["scale_factor"] = scale_factor
         results["keep_ratio"] = True

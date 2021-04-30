@@ -3,17 +3,14 @@ import sys
 from argparse import ArgumentParser
 
 from cvtk.utils.abc.coco.build import make_dataset as coco_build
-from cvtk.utils.abc.coco.yolo import yolo_from_coco as coco_to_yolo
 from cvtk.utils.abc.coco.sampling import KeepPSamplesIn, LeavePGroupsOut
+from cvtk.utils.abc.coco.yolo import yolo_from_coco as coco_to_yolo
 from cvtk.utils.abc.patch import patch_images
 from cvtk.utils.abc.visualize import display_coco, display_test
 
 # Remove "" and current working directory from the first entry of sys.path
-while True:
-    if sys.path[0] in ("", os.getcwd()):
-        sys.path.pop(0)
-    else:
-        break
+if sys.path[0] in ("", os.getcwd()):
+    sys.path.pop(0)
 
 
 def args_coco_build(args=None):
