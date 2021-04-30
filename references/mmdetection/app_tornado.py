@@ -17,19 +17,18 @@ class MainHandler(tornado.web.RequestHandler):
         self.finish(results)
 
 
-def make_app():
-    return tornado.web.Application([
-        (r"/predict", MainHandler),
-    ])
-
-
-config = ""
-checkpoint = ""
-my_model = init_detector(config, checkpoint, device="cuda:0")
+def load_model(config, checkpoint):
+    return init_detector(config, checkpoint, device="cuda:0")
 
 
 # CUDA_VISIBLE_DEVICES=1 python app_tornado.py 7000
 if __name__ == "__main__":
-    port = sys.argv[1]
-    make_app().listen(int(port))
+    args = sys.argv[1:]
+
+    port = int(args[0])
+    my_model = load_model(args[1], args[2])
+
+    tornado.web.Application([
+        (r"/predict", MainHandler),
+    ]).listen(port)
     tornado.ioloop.IOLoop.current().start()
