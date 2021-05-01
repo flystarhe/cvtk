@@ -23,7 +23,7 @@ def json_encode(_result, _classes):
     if isinstance(_result, tuple):
         _result = _result[0]
 
-    dt_list = []
+    dts = []
     for i, bboxes in enumerate(_result):
         label = _classes[i]
         for tl_x, tl_y, br_x, br_y, score in bboxes.astype(np.int64).tolist():
@@ -32,8 +32,8 @@ def json_encode(_result, _classes):
                 xyxy=[tl_x, tl_y, br_x, br_y],
                 label=label, score=score,
             )
-            dt_list.append(dt)
-    return dt_list
+            dts.append(dt)
+    return dts
 
 
 def inference_detector(imgs, model, device=None, test_pipeline=None):
@@ -61,7 +61,7 @@ def inference_detector(imgs, model, device=None, test_pipeline=None):
     return [json_encode(r, classes) for r in results]
 
 
-def test_imgs(img_list, config, checkpoint, batch_size=1):
+def test_imgs(imgs, config, checkpoint, batch_size=1):
     model = init_detector(config, checkpoint, device="cuda:0")
     device = next(model.parameters()).device
 
@@ -71,16 +71,16 @@ def test_imgs(img_list, config, checkpoint, batch_size=1):
     test_pipeline = Compose(test_pipeline)
 
     results = []
-    for i in range(0, len(img_list), batch_size):
-        imgs = [cv.imread(f, 1) for f in img_list[i:i + batch_size]]
+    for i in range(0, len(imgs), batch_size):
+        imgs = [cv.imread(f, 1) for f in imgs[i:i + batch_size]]
         results.extend(inference_detector(imgs, model, device, test_pipeline))
-    return img_list, results
+    return list(zip(imgs, results))
 
 
 def main(args):
     in_file = args.data
-    img_list = load_json(in_file)
-    outputs = test_imgs(img_list, args.config,
+    imgs = load_json(in_file)
+    outputs = test_imgs(imgs, args.config,
                         args.checkpoint, args.batch_size)
     return save_pkl(outputs, in_file + ".pkl")
 
