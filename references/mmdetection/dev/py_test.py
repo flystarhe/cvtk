@@ -4,10 +4,11 @@ import os
 import os.path as osp
 import subprocess
 import time
-from collections import defaultdict
 from pathlib import Path
+from collections import defaultdict
 from cvtk.io import load_json, load_pkl, save_json, save_pkl
 from cvtk.utils.abc.nms import xywh2xyxy
+from scipy.stats import rankdata
 
 IMG_EXTENSIONS = set([".jpg", ".jpeg", ".png", ".bmp"])
 G_COMMAND = "CUDA_VISIBLE_DEVICES={} python py_app.py {} {} {} -b {}"
@@ -70,6 +71,14 @@ def guess_code_by_max_score(dts, **kw):
     return max(dts, key=lambda x: x["score"])
 
 
+def guess_code_by_rank_mixed(dts, **kw):
+    if len(dts) == 0:
+        return dict(bbox=[0, 0, 1, 1], xyxy=[0, 0, 1, 1], label="__OK", score=1.0)
+    rank1 = rankdata([dt["bbox"][2] * dt["bbox"][3] for dt in dts])
+    rank2 = rankdata([dt["score"] for dt in dts])
+    return dts[np.argmax(rank1 + rank2)]
+
+
 def test_coco(data_root, coco_file, gpus, config, checkpoint, batch_size=1, workers_per_gpu=2):
     if coco_file == "none":
         imgs = [str(img) for img in Path(data_root).glob("**/*")
@@ -102,7 +111,7 @@ def test_coco(data_root, coco_file, gpus, config, checkpoint, batch_size=1, work
     outputs = []
     for img_path, dts in results:
         target = guess_code_by_path(img_path)
-        predict = guess_code_by_max_score(dts)
+        predict = guess_code_by_rank_mixed(dts)
         outputs.append([img_path, target, predict, dts, gts[img_path]])
     temp_file = "test_{}.pkl".format(time.strftime("%m%d%H%M"))
     temp_file = osp.join(osp.dirname(checkpoint), temp_file)
