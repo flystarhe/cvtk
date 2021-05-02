@@ -1,6 +1,7 @@
 import hiplot as hip
 import numpy as np
 from cvtk.io import load_json, load_pkl
+from cvtk.utils.abc.gen import image_label
 from cvtk.utils.abc import nms
 
 
@@ -65,21 +66,21 @@ def hip_test(results, score_thr, splits=0, **kw):
         results (list): List of `(img_path, target, predict, dts, gts)`.
         score_thr (dict): Such as `dict(CODE1=S1, CODE2=S2, ...)`.
     """
+    params = dict(mode="complex", score_thr={"*": 0.3}, label_grade={"*": 1})
     clean_mode = kw.get("clean_mode", "min")
     clean_param = kw.get("clean_param", 0.1)
     match_mode = kw.get("match_mode", "iou")
     min_pos_iou = kw.get("min_pos_iou", 0.3)
     by_image = kw.get("by_image", False)
-    gen_code = kw.get("gen_code", "")
+    kw_gen = kw.get("kw_gen", params)
 
     if isinstance(results, str):
         results = load_pkl(results)
 
     vals = []
     for file_name, target, predict, dts, gts in results:
-        file_name = str(file_name)
-
         if by_image:
+            predict = image_label(dts, **kw_gen)
             vals.append(
                 [file_name, target, predict["label"], predict["score"]])
             continue

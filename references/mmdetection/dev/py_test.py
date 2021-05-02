@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from collections import defaultdict
 from cvtk.io import load_json, load_pkl, save_json, save_pkl
+from cvtk.utils.abc.gen import image_label
 from cvtk.utils.abc.nms import xywh2xyxy
 from scipy.stats import rankdata
 
@@ -61,24 +62,6 @@ def multi_gpu_test(dataset, gpus, config, checkpoint, batch_size=1, workers_per_
     return collect_results(pkl_list)
 
 
-def gen_code_by_path(img_path, **kw):
-    return Path(img_path).parent.name
-
-
-def gen_code_by_max_score(dts, **kw):
-    if len(dts) == 0:
-        return dict(bbox=[0, 0, 1, 1], xyxy=[0, 0, 1, 1], label="__OK", score=1.0)
-    return max(dts, key=lambda x: x["score"])
-
-
-def gen_code_by_rank_mixed(dts, **kw):
-    if len(dts) == 0:
-        return dict(bbox=[0, 0, 1, 1], xyxy=[0, 0, 1, 1], label="__OK", score=1.0)
-    rank1 = rankdata([dt["bbox"][2] * dt["bbox"][3] for dt in dts])
-    rank2 = rankdata([dt["score"] for dt in dts])
-    return dts[np.argmax(rank1 + rank2)]
-
-
 def test_coco(data_root, coco_file, gpus, config, checkpoint, batch_size=1, workers_per_gpu=2):
     if coco_file == "none":
         imgs = [str(img) for img in Path(data_root).glob("**/*")
@@ -110,8 +93,8 @@ def test_coco(data_root, coco_file, gpus, config, checkpoint, batch_size=1, work
 
     outputs = []
     for img_path, dts in results:
-        target = gen_code_by_path(img_path)
-        predict = gen_code_by_rank_mixed(dts)
+        target = image_label(img_path)
+        predict = image_label(dts, mode="max_score")
         outputs.append([img_path, target, predict, dts, gts[img_path]])
     temp_file = "test_{}.pkl".format(time.strftime("%m%d%H%M"))
     temp_file = osp.join(osp.dirname(checkpoint), temp_file)
