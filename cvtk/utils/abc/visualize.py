@@ -60,19 +60,19 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
         ann["label"] = id2name[ann["category_id"]]
         cache[ann["image_id"]].append(ann)
 
-    gts, imgs = [], []
+    targets, imgs = [], []
     for img in coco["images"]:
-        gts.append(cache[img["id"]])
+        targets.append(cache[img["id"]])
         imgs.append(coco_dir / img["file_name"])
 
     output_dir.mkdir(parents=True)
-    for anns, file_name in zip(gts, imgs):
+    for gts, file_name in zip(targets, imgs):
         file_name = Path(file_name)
 
         if targets is not None and file_name.stem not in targets:
             continue
 
-        img = draw_bbox(file_name, anns, offset=0, color_val=(0, 255, 0))
+        img = draw_bbox(file_name, gts, offset=0, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
 
@@ -93,18 +93,18 @@ def display_test(results, score_thr, output_dir, **kw):
         targets = pd.read_csv(include)["file_name"].tolist()
         targets = set([Path(file_name).stem for file_name in targets])
 
-    for file_name, _, _, dt, gt in results:
+    for file_name, _, _, dts, gts in results:
         file_name = Path(file_name)
 
         if targets is not None and file_name.stem not in targets:
             continue
 
-        dt = [d for d in dt
-              if d["score"] >= get_val(score_thr, d["label"], 0.3)]
+        dts = [d for d in dts
+               if d["score"] >= get_val(score_thr, d["label"], 0.3)]
         if simple:
-            dt = nms.clean_by_bbox(dt, clean_mode, clean_param)
+            dts = nms.clean_by_bbox(dts, clean_mode, clean_param)
 
-        img = draw_bbox(file_name, dt, offset=0, color_val=(0, 0, 255))
-        img = draw_bbox(img, gt, offset=30, color_val=(0, 255, 0))
+        img = draw_bbox(file_name, dts, offset=0, color_val=(0, 0, 255))
+        img = draw_bbox(img, gts, offset=30, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
