@@ -41,7 +41,7 @@ def clean_models(work_dir, n=2):
             print(f'Warning {name} - {e}')
         return -1
 
-    files = sorted(files, key=lambda x: _num(x))[-n:]
+    files = sorted(files, key=lambda x: _num(x))[:-n]
     return files
 ```
 
