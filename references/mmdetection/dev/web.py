@@ -1,7 +1,11 @@
 import sys
+import traceback
 
 import tornado.ioloop
 import tornado.web
+from cvtk.io import imread
+from mmdet.datasets.pipelines import Compose
+
 from py_app import inference_detector, init_detector
 
 
@@ -10,12 +14,12 @@ class MainHandler(tornado.web.RequestHandler):
     def post(self):
         try:
             global model, device, test_pipeline
-            images = self.get_arguments("image")
-            output = inference_detector(images, model, device, test_pipeline)
-            results = {"status": 0, "data": str(output)}
+            imgs = [imread(f, 1) for f in self.get_arguments("image")]
+            output = inference_detector(imgs, model, device, test_pipeline)
+            self.finish({"status": 0, "data": output})
         except Exception:
-            results = {"status": 1}
-        self.finish(results)
+            output = traceback.format_exc()
+            self.finish({"status": 1, "data": output})
 
 
 # CUDA_VISIBLE_DEVICES=1 python app_tornado.py 7000

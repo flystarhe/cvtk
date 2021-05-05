@@ -9,7 +9,7 @@ command = " ".join(args)
 
 
 times = int(args[0])
-data = {"image": args[1]}
+data = {"image": [args[1]] * 2}
 url = f"http://localhost:{args[2]}/predict"
 headers = {"content-type": "application/x-www-form-urlencoded"}
 
@@ -31,5 +31,6 @@ status = dict(
     times=times,
     oks=oks,
     total_time=total_time,
+    latest_x=x,
 )
 print(str(status))
