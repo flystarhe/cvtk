@@ -92,17 +92,20 @@ def xml2json(xml_path):
 
 
 def make_imdb(img_dir, ann_dir, include=None):
-    cache = []
+    imdb = []
+    bak_files = []
     for img_path, ann_path in _filter(img_dir, ann_dir, include):
         if ann_path.suffix == ".xml":
+            bak_files.append(ann_path)
             ann_data = xml2json(ann_path)
         elif ann_path.suffix == ".json":
+            bak_files.append(ann_path)
             ann_data = load_json(ann_path)
         else:
             ann_data = dict(shapes=[], imageWidth=0, imageHeight=0)
 
-        cache.append((img_path, ann_data, img_path.relative_to(img_dir)))
-    return cache
+        imdb.append((img_path, ann_data, img_path.relative_to(img_dir)))
+    return imdb, bak_files
 
 
 def copyfile(nparr, out_dir, out_path, del_shapes):
@@ -118,7 +121,7 @@ def copyfile(nparr, out_dir, out_path, del_shapes):
 
 
 def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None, min_size=0, all_imgs=True):
-    imdb = make_imdb(img_dir, ann_dir, include)
+    imdb, bak_files = make_imdb(img_dir, ann_dir, include)
 
     if out_dir is not None:
         out_dir = Path(out_dir)
@@ -127,6 +130,10 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         out_dir = img_dir.name + "_coco"
         out_dir = img_dir.parent / out_dir
     shutil.rmtree(out_dir, ignore_errors=True)
+
+    bak_dir = out_dir / "labels"
+    for bak_file in bak_files:
+        shutil.copy(bak_file, bak_dir)
 
     labels = set()
     for _, ann_data, _ in imdb:
