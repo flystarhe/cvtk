@@ -104,7 +104,7 @@ def make_imdb(img_dir, ann_dir, include=None):
         else:
             ann_data = dict(shapes=[], imageWidth=0, imageHeight=0)
 
-        imdb.append((img_path, ann_data, img_path.relative_to(img_dir)))
+        imdb.append((ann_data, img_path, img_path.relative_to(img_dir)))
     return imdb, label_files
 
 
@@ -138,7 +138,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         shutil.copy(label_file, bak_dir)
 
     labels = set()
-    for _, ann_data, _ in imdb:
+    for ann_data, _,  _ in imdb:
         labels.update([s["label"] for s in ann_data["shapes"]])
 
     if mapping is not None:
@@ -149,7 +149,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
 
     imgs, anns = [], []
     img_id, ann_id = 0, 0
-    for img_path, ann_data, out_path in imdb:
+    for ann_data, img_path, out_path in imdb:
         shapes = ann_data["shapes"]
         img_w = ann_data["imageWidth"]
         img_h = ann_data["imageHeight"]

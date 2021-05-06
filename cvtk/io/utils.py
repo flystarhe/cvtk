@@ -24,10 +24,13 @@ def increment_path(path, exist_ok=True, sep=""):
     if not path.exists() or exist_ok:
         return make_dir(path)
 
-    dirs = glob.glob(f"{path}{sep}*")  # similar paths
-    matches = [re.search(rf"%s{sep}(\d+)" % path.name, d) for d in dirs]
-    i = [int(m.groups()[0]) for m in matches if m]  # indices
-    n = max(i) + 1 if i else 2  # increment number
+    dirs = glob.glob(f"{path}{sep}*")
+    pattern = re.compile(rf"{path.name}{sep}(\d+)")
+
+    matches = [pattern.search(d) for d in dirs]
+    i = [int(m.groups()[0]) for m in matches if m]
+
+    n = max(i) + 1 if i else 2
     return make_dir(f"{path}{sep}{n}")
 
 
