@@ -77,25 +77,26 @@ test_pipeline = [
 ]
 
 classes = None
+num_classes = 20
 data_root = '/workspace/datasets/xxxx'
 cfg_dataset = dict(
     samples_per_gpu=4,
     workers_per_gpu=4,
     train=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, 'keep_p_samples/0/train.json'),
+        ann_file=os.path.join(data_root, 'keep_p_samples/01/train.json'),
         classes=classes,
         img_prefix=data_root,
         pipeline=train_pipeline),
     val=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, 'keep_p_samples/0/train.json'),
+        ann_file=os.path.join(data_root, 'keep_p_samples/01/train.json'),
         classes=classes,
         img_prefix=data_root,
         pipeline=test_pipeline),
     test=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, 'keep_p_samples/0/train.json'),
+        ann_file=os.path.join(data_root, 'keep_p_samples/01/train.json'),
         classes=classes,
         img_prefix=data_root,
         pipeline=test_pipeline))
@@ -105,9 +106,29 @@ cfg_lr_config = dict(_delete_=True, policy='step', warmup='linear', warmup_iters
 cfg_log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook'),])
 
 cfg_options = dict(
+    model=dict(
+        type='FasterRCNN',
+        pretrained='torchvision://resnet50',
+        backbone=dict(
+            type='ResNet',
+            depth=50,
+        ),
+        rpn_head=dict(
+            anchor_generator=dict(
+                scales=[8],
+                ratios=[0.5, 1.0, 2.0],
+                strides=[4, 8, 16, 32, 64],
+            ),
+        ),
+        roi_head=dict(
+            bbox_head=dict(
+                num_classes=num_classes,
+            ),
+        ),
+    ),
     optimizer=dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001),
     runner=dict(type='EpochBasedRunner', max_epochs=12),
-    evaluation=dict(interval=6, metric='bbox'),
+    evaluation=dict(interval=2, metric='bbox'),
     checkpoint_config=dict(interval=1),
     log_config=cfg_log_config,
     lr_config=cfg_lr_config,
