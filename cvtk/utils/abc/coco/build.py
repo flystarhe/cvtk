@@ -170,7 +170,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                 x_max, y_max = np.max(xys, axis=0)
 
                 w, h = x_max - x_min, y_max - y_min
-                bbox = _norm([x_min, y_min, w, h], img_w, img_h)
+
                 x_mid, y_mid = (x_min + x_max) * 0.5, (y_min + y_max) * 0.5
                 points = [(x_mid, y_min), (x_max, y_mid),
                           (x_mid, y_max), (x_min, y_mid)]
@@ -181,15 +181,21 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                 x_max, y_max = np.max(xys, axis=0)
 
                 w, h = x_max - x_min, y_max - y_min
-                bbox = _norm([x_min, y_min, w, h], img_w, img_h)
             else:
                 raise NotImplementedError(f"Not Implemented: {shape_type}")
 
-            if min(bbox[2:]) < 3:
-                continue
+            x_pad = min_size - w
+            y_pad = min_size - h
+            if x_pad > 0:
+                x_min = x_min - x_pad // 2
+                w = w + x_pad
+            if y_pad > 0:
+                y_min = y_min - y_pad // 2
+                h = h + y_pad
 
-            w = max(min_size, w)
-            h = max(min_size, h)
+            bbox = _norm([x_min, y_min, w, h], img_w, img_h)
+            if (bbox[2] < 3) or (bbox[3] < 3):
+                continue
 
             if label in DEL_LABELS:
                 del_shapes.append(bbox)
