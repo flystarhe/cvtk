@@ -105,17 +105,15 @@ def make_imdb(img_dir, ann_dir, include=None):
     return cache
 
 
-def copyfile(out_dir, img_path, out_path, del_shapes):
-    im = cv.imread(str(img_path), 1)
-
+def copyfile(nparr, out_dir, out_path, del_shapes):
     for bbox in del_shapes:
         x, y, w, h = map(int, bbox)
-        im[y: y + h, x: x + w] = 0
+        nparr[y: y + h, x: x + w] = 0
 
     cur_file = out_dir / "images" / out_path
     cur_file.parent.mkdir(parents=True, exist_ok=True)
 
-    cv.imwrite(str(cur_file), im)
+    cv.imwrite(str(cur_file), nparr)
     return str(cur_file.relative_to(out_dir))
 
 
@@ -143,6 +141,13 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         shapes = ann_data["shapes"]
         img_w = ann_data["imageWidth"]
         img_h = ann_data["imageHeight"]
+
+        try:
+            nparr = cv.imread(str(img_path), 1)
+            assert (img_h, img_w) == nparr.shape[:2]
+        except:
+            print(f"bad-image: {img_path}")
+            continue
 
         if len(shapes) == 0:
             print(f"none-shapes: {img_path}")
@@ -202,7 +207,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         img = dict(id=img_id,
                    width=img_w,
                    height=img_h,
-                   file_name=copyfile(out_dir, img_path, out_path, del_shapes))
+                   file_name=copyfile(nparr, out_dir, out_path, del_shapes))
         imgs.append(img)
 
     cats = [dict(id=i, name=name, supercategory="")
