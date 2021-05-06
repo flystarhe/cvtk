@@ -149,10 +149,9 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
             print(f"bad-image: {img_path}")
             continue
 
-        if len(shapes) == 0:
-            print(f"none-shapes: {img_path}")
-            if not all_imgs:
-                continue
+        if (len(shapes) == 0) and (not all_imgs):
+            print(f"skip-image: {img_path}")
+            continue
 
         img_id += 1
         del_shapes = []
@@ -201,7 +200,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                        image_id=img_id,
                        category_id=cat_index[label],
                        segmentation=[np.asarray(points).flatten().tolist()],
-                       area=np.prod(bbox[2:]), bbox=bbox, xyxy=nms.xywh2xyxy(bbox), iscrowd=0)
+                       area=bbox[2] * bbox[3], bbox=bbox, xyxy=nms.xywh2xyxy(bbox), iscrowd=0)
             anns.append(ann)
 
         img = dict(id=img_id,
