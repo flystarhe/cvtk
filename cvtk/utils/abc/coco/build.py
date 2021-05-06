@@ -140,8 +140,11 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     labels = set()
     for _, ann_data, _ in imdb:
         labels.update([s["label"] for s in ann_data["shapes"]])
-    labels = sorted(labels)
 
+    if mapping is not None:
+        labels = set([_trans(mapping, l) for l in labels])
+
+    labels = sorted(labels - DEL_LABELS)
     cat_index = {l: i for i, l in enumerate(labels)}
 
     imgs, anns = [], []
