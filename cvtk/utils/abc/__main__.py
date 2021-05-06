@@ -165,26 +165,33 @@ def _main(args=None):
 
     if task == "coco":
         kw = args_coco_build(args)
+        print(f"kwargs: {kw}")
         return coco_build(**kw)
     elif task == "coco2yolo":
         kw = args_coco_to_yolo(args)
+        print(f"kwargs: {kw}")
         return coco_to_yolo(**kw)
     elif task == "coco4kps":
         kw = args_coco_keep_p_sample(args)
+        print(f"kwargs: {kw}")
         p = kw.pop("p")
         return KeepPSamplesIn(p).split(**kw)
     elif task == "coco4lpg":
         kw = args_coco_leave_p_group(args)
+        print(f"kwargs: {kw}")
         p = kw.pop("p")
         return LeavePGroupsOut(p).split(**kw)
     elif task == "patch":
         kw = args_patch_images(args)
+        print(f"kwargs: {kw}")
         return patch_images(**kw)
     elif task == "viz-coco":
         kw = args_display_coco(args)
+        print(f"kwargs: {kw}")
         return display_coco(**kw)
     elif task == "viz-test":
         kw = args_display_test(args)
+        print(f"kwargs: {kw}")
         return display_test(**kw)
     elif task == "-h" or task == "--help":
         print("usage: python -m cvtk.utils.abc command ...\n", help_doc_str)
