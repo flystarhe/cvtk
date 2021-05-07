@@ -89,7 +89,7 @@ def test_coco(data_root, coco_file, gpus, config, checkpoint, batch_size=1, work
 
     results = multi_gpu_test(
         imgs, gpus, config, checkpoint, batch_size, workers_per_gpu)
-    assert len(imgs) = len(results)
+    assert len(imgs) == len(results)
 
     outputs = []
     for img_path, dts in results:

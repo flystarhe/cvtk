@@ -174,6 +174,7 @@ ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, WORK_DIR)
 !python -m torch.distributed.launch --nproc_per_node=2 dev/py_train.py {ARG_TRAIN}
 DEL_FILES = ' '.join(clean_models(WORK_DIR, 2))
 logs = !rm -rfv {DEL_FILES}
+f'WORK_DIR: {WORK_DIR}'
 ```
 
 ## test
