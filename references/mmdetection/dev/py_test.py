@@ -109,9 +109,9 @@ def main(args):
 if __name__ == "__main__":
     print("\n{:#^64}\n".format(__file__))
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument("root", type=str,
+    parser.add_argument("data_root", type=str,
                         help="dataset root")
-    parser.add_argument("coco", type=str,
+    parser.add_argument("coco_file", type=str,
                         help="coco json file")
     parser.add_argument("gpus", type=int,
                         help="number of gpus")
