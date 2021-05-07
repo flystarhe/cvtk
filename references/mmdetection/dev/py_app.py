@@ -72,8 +72,9 @@ def test_imgs(imgs, config, checkpoint, batch_size=1):
 
     results = []
     for i in range(0, len(imgs), batch_size):
-        imgs = [cv.imread(f, 1) for f in imgs[i:i + batch_size]]
-        results.extend(inference_detector(imgs, model, device, test_pipeline))
+        nparr_list = [cv.imread(f, 1) for f in imgs[i:i + batch_size]]
+        results.extend(inference_detector(
+            nparr_list, model, device, test_pipeline))
     return list(zip(imgs, results))
 
 

@@ -12,10 +12,11 @@ from cvtk.utils.abc.nms import xywh2xyxy
 from scipy.stats import rankdata
 
 IMG_EXTENSIONS = set([".jpg", ".jpeg", ".png", ".bmp"])
-G_COMMAND = "CUDA_VISIBLE_DEVICES={} python py_app.py {} {} {} -b {}"
+G_COMMAND = "CUDA_VISIBLE_DEVICES={} python dev/py_app.py {} {} {} -b {}"
 
 
-def system_command(gpu_id, file_name, config, checkpoint, batch_size):
+def system_command(params):
+    gpu_id, file_name, config, checkpoint, batch_size = params
     command_line = G_COMMAND.format(
         gpu_id, file_name, config, checkpoint, batch_size)
     result = subprocess.run(command_line, shell=True, stdout=subprocess.PIPE)
