@@ -22,7 +22,7 @@ docker update --restart=always ${n}
 
 ## base
 ```python
-%cd /workspace/cvtk/references/mmdetection/dev
+%cd /workspace/cvtk/references/mmdetection
 
 import os
 
@@ -84,7 +84,7 @@ classes = None
 num_classes = 20
 data_root = '/workspace/datasets/xxxx'
 group = 'task_name'
-project = f'lr_{xlr}_epochs_{times}x'
+project = f'lr_{xlr}x_epochs_{times}x'
 
 cfg_data = dict(
     samples_per_gpu=4,

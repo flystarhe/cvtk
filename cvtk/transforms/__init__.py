@@ -11,9 +11,9 @@ The `yolo` format
     `x`, `y` - normalized bbox center; `width`, `height` - normalized bbox width and height.
 """
 from .gaussian import GaussNoise, PeakNoise
-from .mmdet import RandomCrop, Resize2
+from .mmdet import RandomCrop, Resize
 
 __all__ = [
     "GaussNoise", "PeakNoise",
-    "RandomCrop", "Resize2",
+    "RandomCrop", "Resize",
 ]
