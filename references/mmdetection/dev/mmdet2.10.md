@@ -20,10 +20,19 @@ docker run --gpus device=0 -d -p 7000:9000 --ipc=host --name ${n} -v "$(pwd)"/${
 docker update --restart=always ${n}
 ```
 
+## data
+```python
+img_dir=dataset
+ann_dir=${img_dir}
+out_dir=${img_dir}_coco
+mapping='{"HARD":"__DEL"}'
+python -m cvtk.utils.abc coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
+python -m cvtk.utils.abc coco4kps 500 ${out_dir}/coco.json --stratified
+```
+
 ## base
 ```python
 %cd /workspace/cvtk/references/mmdetection
-
 import os
 
 MMDET_PATH = '/usr/src/mmdetection'
@@ -51,6 +60,7 @@ def clean_models(work_dir, n=2):
 
 ## train
 ```python
+%%time
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
@@ -83,6 +93,7 @@ times = 1
 classes = None
 num_classes = 20
 data_root = '/workspace/datasets/xxxx'
+coco_file = 'keep_p_samples/01/train.json'
 group = 'task_name'
 project = f'lr_{xlr}x_epochs_{times}x'
 
@@ -91,19 +102,19 @@ cfg_data = dict(
     workers_per_gpu=4,
     train=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, 'keep_p_samples/01/train.json'),
+        ann_file=os.path.join(data_root, coco_file),
         classes=classes,
         img_prefix=data_root,
         pipeline=train_pipeline),
     val=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, 'keep_p_samples/01/train.json'),
+        ann_file=os.path.join(data_root, coco_file),
         classes=classes,
         img_prefix=data_root,
         pipeline=test_pipeline),
     test=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, 'keep_p_samples/01/train.json'),
+        ann_file=os.path.join(data_root, coco_file),
         classes=classes,
         img_prefix=data_root,
         pipeline=test_pipeline))
@@ -163,4 +174,25 @@ ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, WORK_DIR)
 !python -m torch.distributed.launch --nproc_per_node=2 dev/py_train.py {ARG_TRAIN}
 DEL_FILES = ' '.join(clean_models(WORK_DIR, 2))
 logs = !rm -rfv {DEL_FILES}
+```
+
+## test
+```python
+%%time
+import os
+
+times = 1
+work_dir = WORK_DIR
+config = os.path.basename(CONFIG)
+data_root = '/workspace/datasets/xxxx'
+coco_file = 'keep_p_samples/01/train.json'
+
+gpus = 2
+config_file = os.path.join(work_dir, config)
+checkpoint_file = os.path.join(work_dir, f'epoch_{12 * times}.pth')
+batch_size = 2
+workers_per_gpu = 2
+
+ARG_TEST = f'{data_root} {coco_file} {gpus} {config_file} {checkpoint_file} {batch_size} {workers_per_gpu}'
+!python dev/py_test.py {ARG_TEST}
 ```
