@@ -22,6 +22,8 @@ docker update --restart=always ${n}
 
 ## base
 ```python
+%cd /workspace/cvtk/references/mmdetection/dev
+
 import os
 
 MMDET_PATH = '/usr/src/mmdetection'
@@ -76,10 +78,13 @@ test_pipeline = [
         ]),
 ]
 
+xlr = 1
 times = 1
 classes = None
 num_classes = 20
 data_root = '/workspace/datasets/xxxx'
+group = 'task_name'
+project = f'lr_{xlr}_epochs_{times}x'
 
 cfg_data = dict(
     samples_per_gpu=4,
@@ -141,7 +146,7 @@ cfg_log_config = dict(
 )
 
 cfg_options = dict(
-    optimizer=dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001),
+    optimizer=dict(type='SGD', lr=0.01 * xlr, momentum=0.9, weight_decay=0.0001),
     runner=dict(type='EpochBasedRunner', max_epochs=12 * times),
     evaluation=dict(interval=2, metric='bbox'),
     checkpoint_config=dict(interval=1),
@@ -151,7 +156,7 @@ cfg_options = dict(
     data=cfg_data)
 os.environ['CFG_OPTIONS'] = str(cfg_options)
 
-WORK_DIR = '/workspace/results/{}/{}'.format('task_name', 'lr_1x_epochs_1x')
+WORK_DIR = '/workspace/results/{}/{}'.format(group, project)
 CONFIG = os.path.join(MMDET_PATH, 'configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
 
 ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, WORK_DIR)
