@@ -43,7 +43,7 @@ def clean_models(work_dir, n=2):
     import re
     from pathlib import Path
     pattern = re.compile(r'_(\d+)')
-    files = Path(work_dir).glob('model_*')
+    files = Path(work_dir).glob('epoch_*')
 
     def _num(name):
         try:
@@ -195,4 +195,48 @@ workers_per_gpu = 2
 
 ARG_TEST = f'{data_root} {coco_file} {gpus} {config_file} {checkpoint_file} {batch_size} {workers_per_gpu}'
 !python dev/py_test.py {ARG_TEST}
+```
+
+## notes
+```python
+cfg_model = dict(
+    type='FasterRCNN',
+    pretrained='torchvision://resnet50',
+    backbone=dict(
+        type='ResNet',
+        depth=50,
+    ),
+    rpn_head=dict(
+        anchor_generator=dict(
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64],
+        ),
+    ),
+    roi_head=dict(
+        bbox_head=dict(
+            num_classes=num_classes,
+        ),
+    ),
+)
+
+cfg_lr_config = dict(
+    _delete_=True,
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[8 * times, 11 * times],
+)
+
+cfg_lr_config = dict(
+    _delete_=True,
+    policy='OneCycleLrUpdaterHook',
+    max_lr=0.01 * xlr,
+    pct_start=0.3,
+    anneal_strategy='cos',
+    div_factor=25,
+    final_div_factor=1e4,
+    three_phase=False,
+)
 ```
