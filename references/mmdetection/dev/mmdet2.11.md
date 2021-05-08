@@ -1,6 +1,6 @@
 # mmdet v2
-- [mmdetection v2.10.0](https://github.com/open-mmlab/mmdetection)
-- [mmcv 1.2.7](https://github.com/open-mmlab/mmcv)
+- [mmdetection v2.11.0](https://github.com/open-mmlab/mmdetection)
+- [mmcv 1.3.3](https://github.com/open-mmlab/mmcv)
 
 ## docker
 - Python: 3.8
@@ -11,10 +11,10 @@
 - `python /workspace/app_tornado.py 7000 ${@:2}` for `app` mode
 
 ```sh
-docker pull flystarhe/mmdet:2.10-mmcv1.2-torch1.7-cuda10.2
+docker pull flystarhe/mmdet:2.11-mmcv1.3-torch1.7-cuda11.0
 
 n=test
-t=flystarhe/mmdet:2.10-mmcv1.2-torch1.7-cuda10.2
+t=flystarhe/mmdet:2.11-mmcv1.3-torch1.7-cuda11.0
 docker run --gpus device=0 -d -p 7000:9000 --ipc=host --name ${n} -v "$(pwd)"/${n}:/workspace ${t} [dev|ssh|app]
 
 docker update --restart=always ${n}
@@ -231,6 +231,17 @@ cfg_lr_config = dict(
     warmup_iters=500,
     warmup_ratio=0.001,
     step=8 * times,
+)
+
+cfg_lr_config = dict(
+    _delete_=True,
+    policy='OneCycle',
+    max_lr=0.01 * xlr,
+    pct_start=0.3,
+    anneal_strategy='cos',
+    div_factor=25,
+    final_div_factor=1e4,
+    three_phase=False,
 )
 
 from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image
