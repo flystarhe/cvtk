@@ -192,7 +192,7 @@ coco_file = 'keep_p_samples/01/train.json'
 gpus = 2
 config_file = os.path.join(work_dir, config)
 checkpoint_file = os.path.join(work_dir, f'epoch_{12 * times}.pth')
-batch_size = 2
+batch_size = 1
 workers_per_gpu = 2
 
 ARG_TEST = f'{data_root} {coco_file} {gpus} {config_file} {checkpoint_file} {batch_size} {workers_per_gpu}'

@@ -26,7 +26,7 @@ def json_encode(_result, _classes):
     dts = []
     for i, bboxes in enumerate(_result):
         label = _classes[i]
-        for tl_x, tl_y, br_x, br_y, score in bboxes.astype(np.int64).tolist():
+        for tl_x, tl_y, br_x, br_y, score in bboxes.tolist():
             dt = dict(
                 bbox=[tl_x, tl_y, br_x - tl_x, br_y - tl_y],
                 xyxy=[tl_x, tl_y, br_x, br_y],
