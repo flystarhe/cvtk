@@ -143,7 +143,7 @@ cfg_model = dict(
 
 cfg_lr_config = dict(
     _delete_=True,
-    policy='step',
+    policy='Step',
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
