@@ -215,14 +215,26 @@ cfg_model = dict(
         type='ResNet',
         depth=50,
     ),
+    neck=dict(
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=6,
+        start_level=1,
+        add_extra_convs='on_input',
+        relu_before_extra_convs=False,
+    ),
     rpn_head=dict(
         anchor_generator=dict(
-            scales=[8],
+            scales=[4],
             ratios=[0.5, 1.0, 2.0],
-            strides=[4, 8, 16, 32, 64],
+            strides=[8, 16, 32, 64, 128, 256],
         ),
     ),
     roi_head=dict(
+        bbox_roi_extractor=dict(
+            featmap_strides=[8, 16, 32, 64, 128],
+            finest_scale=56,
+        ),
         bbox_head=dict(
             num_classes=num_classes,
         ),
