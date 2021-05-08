@@ -25,14 +25,15 @@ docker update --restart=always ${n}
 img_dir=dataset
 ann_dir=${img_dir}
 out_dir=${img_dir}_coco
+include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
 python -m cvtk.utils.abc coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
 python -m cvtk.utils.abc coco4kps 500 ${out_dir}/coco.json --stratified
 
-results=path_to_pkl
+results=/workspace/results/pkl_file
 score_thr='{"*":0.3}'
-output_dir=path_to_pkl_with_stem
-options='{"include":"path_to_selected_csv"}'
+output_dir=/workspace/results/pkl_file_stem
+options='{"include":"/workspace/results/selected_csv"}'
 python -m cvtk.utils.abc viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 

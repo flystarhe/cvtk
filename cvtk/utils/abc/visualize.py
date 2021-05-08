@@ -72,7 +72,11 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
         if targets is not None and file_name.stem not in targets:
             continue
 
-        img = draw_bbox(file_name, gts, offset=0, color_val=(0, 255, 0))
+        img = cv.imread(str(file_name), 1)
+        text = "/".join(file_name.parts[:-1][-3:])
+        cv.putText(img, f"target: {text}", (15, 30),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (255, 0, 0))
+        img = draw_bbox(img, gts, offset=0, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
 
@@ -93,7 +97,7 @@ def display_test(results, score_thr, output_dir, **kw):
         targets = pd.read_csv(include)["file_name"].tolist()
         targets = set([Path(file_name).stem for file_name in targets])
 
-    for file_name, _, _, dts, gts in results:
+    for file_name, target, predict, dts, gts in results:
         file_name = Path(file_name)
 
         if targets is not None and file_name.stem not in targets:
@@ -104,7 +108,11 @@ def display_test(results, score_thr, output_dir, **kw):
         if simple:
             dts = nms.clean_by_bbox(dts, clean_mode, clean_param)
 
-        img = draw_bbox(file_name, dts, offset=0, color_val=(0, 0, 255))
+        img = cv.imread(str(file_name), 1)
+        text = "/".join(file_name.parts[:-1][-3:])
+        cv.putText(img, f"target: {text}", (15, 30),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (255, 0, 0))
+        img = draw_bbox(img, dts, offset=0, color_val=(0, 0, 255))
         img = draw_bbox(img, gts, offset=30, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)

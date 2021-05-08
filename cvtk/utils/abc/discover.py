@@ -32,7 +32,7 @@ def split_file_name(data, n=1):
 
     def _split(file_name):
         parts = file_name.split("/")[:-1][-n:]
-        return {f"p{i}": p for i, p in enumerate(parts, 1)}
+        return {f"L{i}": p for i, p in enumerate(parts, 1)}
 
     return [{**d, **_split(d["file_name"])} for d in data]
 

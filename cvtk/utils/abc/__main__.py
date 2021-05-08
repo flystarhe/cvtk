@@ -22,7 +22,7 @@ def args_coco_build(args=None):
     parser.add_argument("-o", "--out_dir", type=str, default=None,
                         help="output dir, default save to `{img_dir}_coco`")
     parser.add_argument("-i", "--include", type=str, default=None,
-                        help="filter dataset, hiplot(*.csv), coco(*.json) or dir(path/)")
+                        help="filter dataset with hiplot(*.csv), coco(*.json) or dir(path/)")
     parser.add_argument("-m", "--mapping", type=str, default=None,
                         help="python dict, be run `eval(mapping)`")
     parser.add_argument("-e", "--min_size", type=int, default=0,
