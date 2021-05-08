@@ -47,11 +47,12 @@ def clean_models(work_dir, n=2):
 
     def _num(name):
         try:
-            return int(pattern.search(str(name)).group(1))
+            return int(pattern.search(name).group(1))
         except Exception as e:
             print(f'Warning {name} - {e}')
         return -1
 
+    files = [str(f) for f in files]
     files = sorted(files, key=lambda x: _num(x))[:-n]
     return files
 ```
@@ -223,16 +224,18 @@ cfg_model = dict(
 
 cfg_lr_config = dict(
     _delete_=True,
-    policy='step',
+    policy='Step',
+    gamma=0.1,
+    min_lr=1e-6,
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[8 * times, 11 * times],
+    step=8 * times,
 )
 
 cfg_lr_config = dict(
     _delete_=True,
-    policy='OneCycleLrUpdaterHook',
+    policy='OneCycle',
     max_lr=0.01 * xlr,
     pct_start=0.3,
     anneal_strategy='cos',
