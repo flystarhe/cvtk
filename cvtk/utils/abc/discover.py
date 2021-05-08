@@ -85,7 +85,7 @@ def hip_test(results, splits=0, score_thr=None, clean_mode="min", clean_param=0.
         exclude_j = set()
         if ious is not None:
             for i, j in enumerate(ious.argmax(axis=1)):
-                iou = ious[i, j]
+                iou = float(ious[i, j])
                 dt, gt = dts[i], gts[j]
                 if iou >= min_pos_iou:
                     a = [dt["label"], dt["score"]] + dt["bbox"][2:]
