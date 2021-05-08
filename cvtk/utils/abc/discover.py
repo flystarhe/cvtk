@@ -50,7 +50,7 @@ def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 3
         data.append({"label": cats[ann["category_id"]],
                      "file_name": imgs[ann["image_id"]],
                      "iou": best_iou(w, h, anchors, ratios),
-                     "h_ratio": h / w, "h_ratio_log2": np.log2(h / w),
+                     "h_ratio": h / w, "h_ratio_sqrt": np.sqrt(h / w),
                      "area": w * h, "min_wh": min(w, h)})
 
     if splits > 0:
@@ -59,7 +59,7 @@ def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 3
     return "jupyter.hiplot"
 
 
-def hip_test(results,  splits=0, score_thr=None, clean_mode="min", clean_param=0.1, match_mode="iou", min_pos_iou=0.3, **kw):
+def hip_test(results, splits=0, score_thr=None, clean_mode="min", clean_param=0.1, match_mode="iou", min_pos_iou=0.25):
     """Show model prediction results, allow gts is empty.
 
     Args:
@@ -68,6 +68,9 @@ def hip_test(results,  splits=0, score_thr=None, clean_mode="min", clean_param=0
     """
     if isinstance(results, str):
         results = load_pkl(results)
+
+    if score_thr is None:
+        score_thr = {"*": 0.3}
 
     vals = []
     for file_name, target, predict, dts, gts in results:

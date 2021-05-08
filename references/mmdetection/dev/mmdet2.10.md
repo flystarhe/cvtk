@@ -243,4 +243,20 @@ cfg_lr_config = dict(
     final_div_factor=1e4,
     three_phase=False,
 )
+
+from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image
+
+coco_file = ''
+hip_coco(coco_file, crop_size=800, splits=2, scales=[8], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
+
+results = ''
+score_thr = {"*": 0.3}
+hip_test(results, splits=2, score_thr=score_thr, clean_mode="min", clean_param=0.1, match_mode="iou", min_pos_iou=0.25)
+
+results = ''
+mode = None
+score_thr = {"*": 0.3}
+label_grade = {"*": 1}
+kw = {}
+hip_test_image(results, splits=2, mode=mode, score_thr=score_thr, label_grade=label_grade, **kw)
 ```
