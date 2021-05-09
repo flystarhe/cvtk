@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 from cvtk.utils.abc.coco.build import make_dataset as coco_build
 from cvtk.utils.abc.coco.sampling import KeepPSamplesIn, LeavePGroupsOut
 from cvtk.utils.abc.coco.yolo import yolo_from_coco as coco_to_yolo
+from cvtk.utils.abc.gen import gen_test
 from cvtk.utils.abc.patch import patch_images
 from cvtk.utils.abc.visualize import display_coco, display_test
 
@@ -39,18 +40,6 @@ def args_coco_build(args=None):
     return kw
 
 
-def args_coco_to_yolo(args=None):
-    parser = ArgumentParser(description="yolo from coco")
-    parser.add_argument("coco_dir", type=str,
-                        help="dataset root dir")
-    parser.add_argument("json_dir", type=str,
-                        help="coco file dir")
-    args = parser.parse_args(args=args)
-
-    kw = vars(args)
-    return kw
-
-
 def args_coco_keep_p_sample(args=None):
     parser = ArgumentParser(description="Keep P Sample(s) In task")
     parser.add_argument("p", type=float,
@@ -76,6 +65,44 @@ def args_coco_leave_p_group(args=None):
     args = parser.parse_args(args=args)
 
     kw = vars(args)
+    return kw
+
+
+def args_coco_to_yolo(args=None):
+    parser = ArgumentParser(description="yolo from coco")
+    parser.add_argument("coco_dir", type=str,
+                        help="dataset root dir")
+    parser.add_argument("json_dir", type=str,
+                        help="coco file dir")
+    args = parser.parse_args(args=args)
+
+    kw = vars(args)
+    return kw
+
+
+def args_gen_test(args=None):
+    parser = ArgumentParser(description="gen test")
+    parser.add_argument("results", type=str,
+                        help="path of pkl file")
+    parser.add_argument("mode", type=str,
+                        help="complex, max_score or rank_mixed")
+    parser.add_argument("score_thr", type=str,
+                        help="python dict, be run `eval(score_thr)`")
+    parser.add_argument("label_grade", type=str,
+                        help="python dict, be run `eval(label_grade)`")
+    parser.add_argument("-o", "--options", type=str, default=None,
+                        help="python dict, be run `eval(options)`")
+    args = parser.parse_args(args=args)
+
+    kw = vars(args)
+    score_thr = kw.pop("score_thr")
+    kw["score_thr"] = eval(score_thr)
+    label_grade = kw.pop("label_grade")
+    kw["label_grade"] = eval(label_grade)
+    options = kw.pop("options")
+    if options is not None:
+        kw.update(eval(options))
+
     return kw
 
 
@@ -167,10 +194,6 @@ def _main(args=None):
         kw = args_coco_build(args)
         print(f"kwargs: {kw}")
         return coco_build(**kw)
-    elif task == "coco2yolo":
-        kw = args_coco_to_yolo(args)
-        print(f"kwargs: {kw}")
-        return coco_to_yolo(**kw)
     elif task == "coco4kps":
         kw = args_coco_keep_p_sample(args)
         print(f"kwargs: {kw}")
@@ -181,6 +204,14 @@ def _main(args=None):
         print(f"kwargs: {kw}")
         p = kw.pop("p")
         return LeavePGroupsOut(p).split(**kw)
+    elif task == "coco2yolo":
+        kw = args_coco_to_yolo(args)
+        print(f"kwargs: {kw}")
+        return coco_to_yolo(**kw)
+    elif task == "gen-test":
+        kw = args_gen_test(args)
+        print(f"kwargs: {kw}")
+        return gen_test(**kw)
     elif task == "patch":
         kw = args_patch_images(args)
         print(f"kwargs: {kw}")
@@ -194,14 +225,14 @@ def _main(args=None):
         print(f"kwargs: {kw}")
         return display_test(**kw)
     elif task == "-h" or task == "--help":
-        print("usage: python -m cvtk.utils.abc command ...\n", help_doc_str)
+        print("usage: python -m cvtk command ...\n", help_doc_str)
     else:
         print(f"unimplemented command: {task}\n", help_doc_str)
 
 
 # develop:
-# python cvtk/utils/abc ...
+# python cvtk ...
 # runtime:
-# python -m cvtk.utils.abc ...
+# python -m cvtk ...
 if __name__ == "__main__":
     sys.exit(_main())

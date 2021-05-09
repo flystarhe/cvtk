@@ -21,13 +21,14 @@ docker update --restart=always ${n}
 ```
 
 ## data
-```python
+```sh
 img_dir=dataset
 ann_dir=${img_dir}
 out_dir=${img_dir}_coco
+include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
-python -m cvtk.utils.abc coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
-python -m cvtk.utils.abc coco4kps 500 ${out_dir}/coco.json --stratified
+python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
+python -m cvtk coco4kps 500 ${out_dir}/coco.json --stratified
 ```
 
 ## base
@@ -240,12 +241,8 @@ hip_coco(coco_file, crop_size=800, splits=2, scales=[8], base_sizes=[4, 8, 16, 3
 
 results = ''
 score_thr = {"*": 0.3}
-hip_test(results, splits=2, score_thr=score_thr, clean_mode="min", clean_param=0.1, match_mode="iou", min_pos_iou=0.25)
+hip_test(results, splits=2, score_thr=score_thr, match_mode="iou", min_pos_iou=0.25)
 
 results = ''
-mode = None
-score_thr = {"*": 0.3}
-label_grade = {"*": 1}
-kw = {}
-hip_test_image(results, splits=2, mode=mode, score_thr=score_thr, label_grade=label_grade, **kw)
+hip_test_image(results, splits=2)
 ```

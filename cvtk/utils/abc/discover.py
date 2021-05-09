@@ -1,8 +1,7 @@
 import hiplot as hip
 import numpy as np
 from cvtk.io import load_json, load_pkl
-from cvtk.utils.abc.gen import image_label
-from cvtk.utils.abc import nms
+from cvtk.utils.abc.nms import bbox_overlaps
 
 
 def get_val(data, key, val=None):
@@ -59,7 +58,7 @@ def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 3
     return "jupyter.hiplot"
 
 
-def hip_test(results, splits=0, score_thr=None, clean_mode="min", clean_param=0.1, match_mode="iou", min_pos_iou=0.25):
+def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.25):
     """Show model prediction results, allow gts is empty.
 
     Args:
@@ -76,8 +75,7 @@ def hip_test(results, splits=0, score_thr=None, clean_mode="min", clean_param=0.
     for file_name, target, predict, dts, gts in results:
         dts = [dt for dt in dts
                if dt["score"] >= get_val(score_thr, dt["label"], 0.3)]
-        dts = nms.clean_by_bbox(dts, clean_mode, clean_param)
-        ious = nms.bbox_overlaps(dts, gts, match_mode)
+        ious = bbox_overlaps(dts, gts, match_mode)
 
         base_info = [file_name, target, predict["label"], predict["score"]]
 
@@ -122,31 +120,17 @@ def hip_test(results, splits=0, score_thr=None, clean_mode="min", clean_param=0.
     return "jupyter.hiplot"
 
 
-def hip_test_image(results, splits=0, mode=None, score_thr=None, label_grade=None, **kw):
+def hip_test_image(results, splits=0):
     """Show model prediction results, allow gts is empty.
 
     Args:
         results (list): List of `tuple(img_path, target, predict, dts, gts)`
-        mode (str): Optional value in `{complex, max_score, rank_mixed}`
-        score_thr (dict): Such as `{"CODE1":S1, "CODE2":S2, "*":0.3}`
-        label_grade (dict): Such as `{"CODE1":L1, "CODE2":L2, "*":1}`
     """
-    if score_thr is None:
-        score_thr = {"*": 0.3}
-
-    if label_grade is None:
-        label_grade = {"*": 1}
-
-    kw["score_thr"] = score_thr
-    kw["label_grade"] = label_grade
-
     if isinstance(results, str):
         results = load_pkl(results)
 
     vals = []
     for file_name, target, predict, dts, gts in results:
-        if mode is not None:
-            predict = image_label(dts, mode=mode, **kw)
         vals.append([file_name, target, predict["label"], predict["score"]])
 
     names = ["file_name", "t_label", "p_label", "p_score"]

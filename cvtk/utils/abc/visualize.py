@@ -5,7 +5,7 @@ from pathlib import Path
 import cv2 as cv
 import pandas as pd
 from cvtk.io import increment_path, load_json, load_pkl
-from cvtk.utils.abc import nms
+from cvtk.utils.abc.nms import clean_by_bbox
 
 
 def get_val(data, key, val=None):
@@ -82,10 +82,9 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
 
 
 def display_test(results, score_thr, output_dir, **kw):
-    simple = kw.get("simple", True)
     include = kw.get("include", None)
-    clean_mode = kw.get("clean_mode", "min")
-    clean_param = kw.get("clean_param", 0.1)
+    clean_mode = kw.get("clean_mode", None)
+    clean_param = kw.get("clean_param", None)
     output_dir = increment_path(output_dir, exist_ok=False)
 
     if isinstance(results, str):
@@ -105,8 +104,8 @@ def display_test(results, score_thr, output_dir, **kw):
 
         dts = [d for d in dts
                if d["score"] >= get_val(score_thr, d["label"], 0.3)]
-        if simple:
-            dts = nms.clean_by_bbox(dts, clean_mode, clean_param)
+        if clean_mode is not None:
+            dts = clean_by_bbox(dts, clean_mode, clean_param)
 
         img = cv.imread(str(file_name), 1)
         text = "/".join(file_name.parts[:-1][-3:])

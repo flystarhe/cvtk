@@ -1,5 +1,8 @@
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+from cvtk.io import load_pkl, save_pkl
+from cvtk.utils.abc.nms import clean_by_bbox
 from scipy.stats import rankdata
 
 
@@ -67,3 +70,41 @@ def image_label(x, **kw):
         return gen_code_by_rank_mixed(x, **kw)
     else:
         raise NotImplementedError(f"Not Implemented mode={mode}")
+
+
+def gen_test(results, mode=None, score_thr=None, label_grade=None, **kw):
+    """Show model prediction results, allow gts is empty.
+
+    Args:
+        results (list): List of `tuple(img_path, target, predict, dts, gts)`
+        mode (str): Optional value in `{complex, max_score, rank_mixed}`
+        score_thr (dict): Such as `{"CODE1":S1, "CODE2":S2, "*":0.3}`
+        label_grade (dict): Such as `{"CODE1":L1, "CODE2":L2, "*":1}`
+        clean_mode (str): Optional value in `{dist, iou, min, ...}`
+    """
+    if score_thr is None:
+        score_thr = {"*": 0.3}
+
+    if label_grade is None:
+        label_grade = {"*": 1}
+
+    clean_mode = kw.pop("clean_mode", None)
+    clean_param = kw.pop("clean_param", None)
+
+    temp_file = Path("tmp/test.pkl")
+    if isinstance(results, str):
+        temp_file = Path(results)
+        results = load_pkl(results)
+    temp_file = temp_file.with_suffix(".zzz")
+    temp_file.parent.mkdir(parents=True, exist_ok=True)
+
+    outputs = []
+    for file_name, target, predict, dts, gts in results:
+        if clean_mode is not None:
+            dts = clean_by_bbox(dts, clean_mode, clean_param)
+        if mode is not None:
+            predict = image_label(
+                dts, mode=mode, score_thr=score_thr, label_grade=label_grade, **kw)
+        outputs.append([file_name, target, predict, dts, gts])
+
+    return save_pkl(outputs, str(temp_file))

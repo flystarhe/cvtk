@@ -79,7 +79,7 @@ def _clean_with_ious(dts, mode="iou", thr=0.1):
     return _collate_fn(nodes, lines, dts)
 
 
-def _clean_with_dist(dts, k=1.5):
+def _clean_with_dist(dts, k=1.0):
     bboxes = [dt["xyxy"] for dt in dts]
 
     bboxes = torch.FloatTensor(bboxes)
