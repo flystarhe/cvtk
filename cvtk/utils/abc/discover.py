@@ -85,31 +85,33 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
             for i, j in enumerate(ious.argmax(axis=1)):
                 iou = float(ious[i, j])
                 dt, gt = dts[i], gts[j]
+                is_ok = "Y" if dt["label"] == gt["label"] else "N"
                 if iou >= min_pos_iou:
                     a = [dt["label"], dt["score"]] + dt["bbox"][2:]
                     b = [gt["label"], gt["score"]] + gt["bbox"][2:]
-                    vals.append(base_info + [iou] + a + b)
+                    vals.append(base_info + [iou, is_ok] + a + b)
                     exclude_i.add(i)
                     exclude_j.add(j)
 
         iou = 0.
+        is_ok = "N"
 
         for i, dt in enumerate(dts):
             dt = dts[i]
             if i not in exclude_i:
                 a = [dt["label"], dt["score"]] + dt["bbox"][2:]
                 b = ["none", 0., 1, 1]
-                vals.append(base_info + [iou] + a + b)
+                vals.append(base_info + [iou, is_ok] + a + b)
 
         for j, gt in enumerate(gts):
             gt = gts[j]
             if j not in exclude_j:
                 a = ["none", 0., 1, 1]
                 b = [gt["label"], gt["score"]] + gt["bbox"][2:]
-                vals.append(base_info + [iou] + a + b)
+                vals.append(base_info + [iou, is_ok] + a + b)
 
     names = ["file_name", "t_label", "p_label", "p_score",
-             "iou",
+             "iou", "is_ok",
              "label", "score", "w", "h",
              "gt_label", "gt_score", "gt_w", "gt_h"]
     data = [{a: b for a, b in zip(names, val)} for val in vals]
@@ -131,9 +133,11 @@ def hip_test_image(results, splits=0):
 
     vals = []
     for file_name, target, predict, dts, gts in results:
-        vals.append([file_name, target, predict["label"], predict["score"]])
+        is_ok = "Y" if target == predict["label"] else "N"
+        vals.append([file_name, target,
+                     predict["label"], predict["score"], is_ok])
 
-    names = ["file_name", "t_label", "p_label", "p_score"]
+    names = ["file_name", "t_label", "p_label", "p_score", "is_ok"]
     data = [{a: b for a, b in zip(names, val)} for val in vals]
 
     if splits > 0:
