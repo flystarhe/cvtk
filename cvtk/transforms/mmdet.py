@@ -22,8 +22,8 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
-    s3 = (dst_w >= src_w - 1) * (dst_h >= src_w * 2)
-    s4 = (dst_h >= src_h - 1) * (dst_w >= src_h * 2)
+    s3 = (dst_w >= src_w - 1) * (dst_h >= src_w * 3)
+    s4 = (dst_h >= src_h - 1) * (dst_w >= src_h * 3)
     ss = s1 + s2 + s3 + s4
 
     inner = (dst_w >= 4) * (dst_h >= 4)
@@ -32,12 +32,15 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
 class RandomCrop(object):
     """Crop a random part of the input.
+
     Args:
         height (int): height of the crop.
         width (int): width of the crop.
         p (float): probability.
+
     Targets:
         image, bboxes
+
     Image types:
         uint8,
     """
@@ -145,46 +148,68 @@ class RandomCrop(object):
 
 class Resize(object):
 
-    def __init__(self, test_mode=False, img_scale=None, ratio_range=None, force_square=False, seed=1234, **kw):
-        # img_scale (list[tuple]), ratio_range (tuple[float]): (min_ratio, max_ratio)
+    def __init__(self, test_mode=False, img_scale=None, ratio_range=None, seed=1234, **kw):
+        """Resize images & bbox.
+
+        Args:
+            img_scale (List[Tuple[int, int]]): `[(h, w)]`.
+            ratio_range (Tuple[float]): `(min_ratio, max_ratio)`.
+            multi_scale (List[Tuple[int, int]]): `[(src_scale, dst_scale)]`, scale with max of size.
+        """
         self.test_mode = test_mode
         self.img_scale = img_scale
         self.ratio_range = ratio_range
-        self.force_square = force_square
         self.rng = np.random.default_rng(seed)
+        self.multi_scale = dict(kw.get("multi_scale", []))
 
     def __call__(self, results):
+        scale_factor = 1.0
         img = results["img"]
 
-        if self.force_square:
-            min_hw = min(img.shape[:2])
-            img = img[:min_hw, :min_hw, :]
+        src_scale = max(img.shape[:2])
+        dst_scale = self.multi_scale.get(src_scale, src_scale)
+
+        if isinstance(dst_scale, (list, tuple)):
+            index = self.rng.integers(len(dst_scale))
+            dst_scale = dst_scale[index]
+
+        if src_scale != dst_scale:
+            h, w = img.shape[:2]
+            base_factor = scale_factor
+            scale_factor = dst_scale / src_scale
+            size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
+            img = cv.resize(img, size, dst=None, interpolation=cv.INTER_LINEAR)
+            scale_factor = base_factor * scale_factor
 
         if self.test_mode:
             results["img"] = img
             results["img_shape"] = img.shape
             results["ori_shape"] = img.shape
             results["pad_shape"] = img.shape
-            results["scale_factor"] = 1.0
+            results["scale_factor"] = scale_factor
             results["keep_ratio"] = True
             return results
 
-        h, w = img.shape[:2]
         img_scale = self.img_scale
-        ratio_range = self.ratio_range
         if img_scale is not None:
-            n = len(img_scale)
-            index = self.rng.integers(n)
+            index = self.rng.integers(len(img_scale))
             new_h, new_w = img_scale[index]
+
+            h, w = img.shape[:2]
+            base_factor = scale_factor
             scale_factor = min(new_h / h, new_w / w)
             size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
             img = cv.resize(img, size, dst=None, interpolation=cv.INTER_LINEAR)
-        elif ratio_range is not None:
+            scale_factor = base_factor * scale_factor
+
+        ratio_range = self.ratio_range
+        if ratio_range is not None:
+            h, w = img.shape[:2]
+            base_factor = scale_factor
             scale_factor = self.rng.uniform(*ratio_range)
             size = int(w * scale_factor + 0.5), int(h * scale_factor + 0.5)
             img = cv.resize(img, size, dst=None, interpolation=cv.INTER_LINEAR)
-        else:
-            scale_factor = 1.0
+            scale_factor = base_factor * scale_factor
 
         results["img"] = img
         results["img_shape"] = img.shape

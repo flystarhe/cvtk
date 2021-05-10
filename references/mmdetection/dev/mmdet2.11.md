@@ -87,7 +87,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', test_mode=True, force_square=False),
+    dict(type='Resize', test_mode=True, multi_scale=[]),
     dict(type='RandomCrop', height=800, width=800),
     dict(type='RandomFlip', flip_ratio=0.5, direction=['horizontal', 'vertical', 'diagonal']),
     dict(type='Normalize', **img_norm_cfg),
@@ -101,7 +101,7 @@ test_pipeline = [
         type='MultiScaleFlipAug',
         scale_factor=1.0,
         transforms=[
-            dict(type='Resize', test_mode=True, force_square=False),
+            dict(type='Resize', test_mode=True, multi_scale=[]),
             dict(type='Normalize', **img_norm_cfg),
             dict(type='Pad', size_divisor=32),
             dict(type='DefaultFormatBundle'),
