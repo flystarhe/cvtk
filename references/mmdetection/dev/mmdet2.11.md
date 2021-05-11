@@ -164,10 +164,10 @@ cfg_model = dict(
 cfg_lr_config = dict(
     _delete_=True,
     policy='Step',
+    step=[8 * times, 11 * times],
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.001,
-    step=[8 * times, 11 * times],
 )
 
 cfg_log_config = dict(
@@ -227,24 +227,30 @@ cfg_model = dict(
     backbone=dict(
         type='ResNet',
         depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
     ),
     neck=dict(
+        type='FPN',
         in_channels=[256, 512, 1024, 2048],
         out_channels=256,
-        num_outs=6,
+        num_outs=5,
         start_level=1,
         add_extra_convs='on_input',
         relu_before_extra_convs=False,
     ),
     rpn_head=dict(
         anchor_generator=dict(
-            scales=[4],
+            type='AnchorGenerator',
+            scales=[8],
             ratios=[0.5, 1.0, 2.0],
-            strides=[8, 16, 32, 64, 128, 256],
+            strides=[8, 16, 32, 64, 128],
         ),
     ),
     roi_head=dict(
         bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
             featmap_strides=[8, 16, 32, 64, 128],
             finest_scale=56,
         ),
@@ -257,12 +263,22 @@ cfg_model = dict(
 cfg_lr_config = dict(
     _delete_=True,
     policy='Step',
+    step=[8 * times, 11 * times],
     gamma=0.1,
-    min_lr=1e-6,
+    min_lr=1e-7,
     warmup='linear',
-    warmup_iters=500,
+    warmup_iters=1500,
     warmup_ratio=0.001,
-    step=8 * times,
+)
+
+cfg_lr_config = dict(
+    _delete_=True,
+    policy='CosineAnnealing',
+    by_epoch=False,
+    min_lr_ratio=1e-5,
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=0.001,
 )
 
 cfg_lr_config = dict(
