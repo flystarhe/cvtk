@@ -48,7 +48,6 @@ def args_image_size(args=None):
     args = parser.parse_args(args=args)
 
     kw = vars(args)
-
     return kw
 
 
@@ -184,9 +183,11 @@ Options:
 positional arguments:
     command
         coco
-        coco2yolo
+        img-size
         coco4kps
         coco4lpg
+        coco2yolo
+        gen-test
         patch
         viz-coco
         viz-test
