@@ -7,6 +7,7 @@ if sys.path[0] in ("", os.getcwd()):
     sys.path.pop(0)
 
 from cvtk.utils.abc.coco.build import make_dataset as coco_build
+from cvtk.utils.abc.coco.image import count_image_size as image_size
 from cvtk.utils.abc.coco.sampling import KeepPSamplesIn, LeavePGroupsOut
 from cvtk.utils.abc.coco.yolo import yolo_from_coco as coco_to_yolo
 from cvtk.utils.abc.gen import gen_test
@@ -36,6 +37,17 @@ def args_coco_build(args=None):
     mapping = kw.pop("mapping")
     if mapping is not None:
         kw["mapping"] = eval(mapping)
+
+    return kw
+
+
+def args_image_size(args=None):
+    parser = ArgumentParser(description="count image size")
+    parser.add_argument("img_dir", type=str,
+                        help="images dir")
+    args = parser.parse_args(args=args)
+
+    kw = vars(args)
 
     return kw
 
@@ -194,6 +206,10 @@ def _main(args=None):
         kw = args_coco_build(args)
         print(f"kwargs: {kw}")
         return coco_build(**kw)
+    if task == "img-size":
+        kw = args_image_size(args)
+        print(f"kwargs: {kw}")
+        return image_size(**kw)
     elif task == "coco4kps":
         kw = args_coco_keep_p_sample(args)
         print(f"kwargs: {kw}")
