@@ -77,7 +77,7 @@ def clean_models(work_dir, n=2):
     return files
 ```
 
->`%time !jupyter nbconvert --ExecutePreprocessor.timeout=-1 --to html --execute --allow-errors notebook.ipynb`
+>`%time !jupyter nbconvert --ExecutePreprocessor.timeout=-1 --to html --execute --allow-errors notebook_ipynb`
 
 ## train
 ```python
@@ -227,14 +227,8 @@ cfg_model = dict(
     backbone=dict(
         type='ResNet',
         depth=50,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
     ),
     neck=dict(
-        type='FPN',
-        in_channels=[256, 512, 1024, 2048],
-        out_channels=256,
         num_outs=5,
         start_level=1,
         add_extra_convs='on_input',
@@ -242,15 +236,13 @@ cfg_model = dict(
     ),
     rpn_head=dict(
         anchor_generator=dict(
-            type='AnchorGenerator',
-            scales=[8],
+            scales=[4],
             ratios=[0.5, 1.0, 2.0],
             strides=[8, 16, 32, 64, 128],
         ),
     ),
     roi_head=dict(
         bbox_roi_extractor=dict(
-            type='SingleRoIExtractor',
             featmap_strides=[8, 16, 32, 64, 128],
             finest_scale=56,
         ),
