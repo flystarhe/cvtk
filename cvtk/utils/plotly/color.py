@@ -12,7 +12,7 @@ def _hist(npimg):
     return hist
 
 
-def color_hist(img_path, start=0, limit=1):
+def color_hist(img_path, start=0, limit=1, mode="BGR"):
     # jupyter: %matplotlib inline
     img_path = Path(img_path)
 
@@ -28,20 +28,29 @@ def color_hist(img_path, start=0, limit=1):
     for img_path in img_list[start: start + limit]:
         nparr = cv.imread(str(img_path), 1)
 
+        if mode == "BGR":
+            mode = ["B", "G", "R"]
+        elif mode == "HSV":
+            mode = ["H", "S", "V"]
+            nparr = cv.cvtColor(nparr, cv.COLOR_BGR2HSV)
+        elif mode == "YCrCb":
+            mode = ["Y", "Cr", "Cb"]
+            nparr = cv.cvtColor(nparr, cv.COLOR_BGR2YCrCb)
+
         ax = axs[0]
         hist = _hist(nparr[..., 0])
         ax.plot(hist / (hist.max() + 1))
-        ax.set_title("Color [B] value")
+        ax.set_title(f"Color [{mode[0]}] value")
         ax.set_xlim(0, 256)
 
         ax = axs[1]
         hist = _hist(nparr[..., 1])
         ax.plot(hist / (hist.max() + 1))
-        ax.set_title("Color [G] value")
+        ax.set_title(f"Color [{mode[1]}] value")
         ax.set_xlim(0, 256)
 
         ax = axs[2]
         hist = _hist(nparr[..., 2])
         ax.plot(hist / (hist.max() + 1))
-        ax.set_title("Color [R] value")
+        ax.set_title(f"Color [{mode[2]}] value")
         ax.set_xlim(0, 256)
