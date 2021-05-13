@@ -252,4 +252,5 @@ def _main(args=None):
 # runtime:
 # python -m cvtk ...
 if __name__ == "__main__":
-    sys.exit(_main())
+    print(_main())
+    sys.exit(0)

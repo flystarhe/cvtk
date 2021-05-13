@@ -22,6 +22,9 @@ docker update --restart=always ${n}
 
 ## data
 ```sh
+#%%bash
+#Jupyter Cell
+
 img_dir=dataset
 ann_dir=${img_dir}
 out_dir=${img_dir}_coco
