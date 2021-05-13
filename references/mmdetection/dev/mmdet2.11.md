@@ -26,10 +26,11 @@ docker update --restart=always ${n}
 
 img_dir=dataset
 ann_dir=${img_dir}
-out_dir=${img_dir}_coco
+out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
 python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
+
 python -m cvtk coco4kps 500 ${out_dir}/coco.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
