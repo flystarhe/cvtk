@@ -131,12 +131,6 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         out_dir = img_dir.parent / out_dir
     shutil.rmtree(out_dir, ignore_errors=True)
 
-    bak_dir = out_dir / "labels"
-    bak_dir.mkdir(parents=True, exist_ok=True)
-
-    for label_file in label_files:
-        shutil.copy(label_file, bak_dir)
-
     labels = set()
     for ann_data, _,  _ in imdb:
         labels.update([s["label"] for s in ann_data["shapes"]])
@@ -145,7 +139,14 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         labels = set([_trans(mapping, l) for l in labels])
 
     labels = sorted(labels - DEL_LABELS)
+    print(f"\nlabels: {len(labels)}\n{labels}\n")
     cat_index = {l: i for i, l in enumerate(labels)}
+
+    bak_dir = out_dir / "labels"
+    bak_dir.mkdir(parents=True, exist_ok=True)
+
+    for label_file in label_files:
+        shutil.copy(label_file, bak_dir)
 
     imgs, anns = [], []
     img_id, ann_id = 0, 0
@@ -230,6 +231,6 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     cats = [dict(id=i, name=name, supercategory="")
             for i, name in enumerate(labels)]
     coco = dict(images=imgs, annotations=anns, categories=cats)
-    print(f"imgs: {len(imgs)}, anns: {len(anns)}\nlabels: {labels}")
+    print(f"imgs: {len(imgs)}, anns: {len(anns)}, cats: {len(cats)}")
     save_json(coco, out_dir / "coco.json")
     return str(out_dir)
