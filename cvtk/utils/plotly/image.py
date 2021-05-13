@@ -25,6 +25,8 @@ def image_hist(img_path, start=0, limit=1):
     else:
         raise TypeError(f"{img_path} is not a file or dir")
 
+    assert limit >= 1 and len(img_list) > start
+
     fig, axs = plt.subplots(nrows=3, figsize=(8, 12))
     for img_path in img_list[start: start + limit]:
         npimg = cv.imread(str(img_path), 0)
