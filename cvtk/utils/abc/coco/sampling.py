@@ -55,7 +55,7 @@ class KeepPSamplesIn(object):
             groups = {"none": [img["id"] for img in coco["images"]]}
 
         print([(k, len(groups[k])) for k in sorted(groups.keys())])
-        for i in range(1, 11):
+        for i in range(1, 6):
             test_index, train_index = self._split(groups, seed * i)
 
             this_dir = make_dir(out_dir / f"{i:02d}")
