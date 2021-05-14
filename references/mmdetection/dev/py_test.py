@@ -56,7 +56,7 @@ def multi_gpu_test(dataset, gpus, config, checkpoint, batch_size=1, workers_per_
 
     pool = multiprocessing.Pool(processes=gpus * workers_per_gpu)
     logs = pool.map(system_command, params)
-    print("test:\n", "\n".join(logs))
+    print("\n".join(logs))
 
     pkl_list = [f + ".pkl" for f in file_list]
     return collect_results(pkl_list)
