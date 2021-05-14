@@ -115,11 +115,13 @@ def display_test(results, score_thr, output_dir, **kw):
         cv.putText(img, text, (15, 30),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
+        predict["bbox"] = list(map(int, predict["bbox"]))
         text = "{label} {score:.2f} {bbox}".format(**predict)
         cv.putText(img, text, (15, 60),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
         for i, d in enumerate(dts, 1):
+            d["bbox"] = list(map(int, d["bbox"]))
             text = "{} {label} {score:.2f} {bbox}".format(i, **d)
             cv.putText(img, text, (15, 60 + 30 * i),
                        cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
