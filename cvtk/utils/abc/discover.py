@@ -49,8 +49,8 @@ def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 3
         data.append({"label": cats[ann["category_id"]],
                      "file_name": imgs[ann["image_id"]],
                      "iou": best_iou(w, h, anchors, ratios),
-                     "h_ratio": h / w, "h_ratio_sqrt": np.sqrt(h / w),
-                     "area": w * h, "min_wh": min(w, h)})
+                     "h_ratio": h / w, "scale": np.sqrt(h * w),
+                     "max_size": max(w, h), "min_size": min(w, h)})
 
     if splits > 0:
         data = split_file_name(data, splits)
@@ -87,8 +87,8 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
                 dt, gt = dts[i], gts[j]
                 is_ok = "Y" if dt["label"] == gt["label"] else "N"
                 if iou >= min_pos_iou:
-                    a = [dt["label"], dt["score"]] + dt["bbox"][2:]
-                    b = [gt["label"], gt["score"]] + gt["bbox"][2:]
+                    a = [dt["label"], dt["score"], dt["area"]] + dt["bbox"][2:]
+                    b = [gt["label"], gt["score"], gt["area"]] + gt["bbox"][2:]
                     vals.append(base_info + [iou, is_ok] + a + b)
                     exclude_i.add(i)
                     exclude_j.add(j)
@@ -99,21 +99,21 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
         for i, dt in enumerate(dts):
             dt = dts[i]
             if i not in exclude_i:
-                a = [dt["label"], dt["score"]] + dt["bbox"][2:]
-                b = ["none", 0., 1, 1]
+                a = [dt["label"], dt["score"], dt["area"]] + dt["bbox"][2:]
+                b = ["none", 0., 1, 1, 1]
                 vals.append(base_info + [iou, is_ok] + a + b)
 
         for j, gt in enumerate(gts):
             gt = gts[j]
             if j not in exclude_j:
-                a = ["none", 0., 1, 1]
-                b = [gt["label"], gt["score"]] + gt["bbox"][2:]
+                a = ["none", 0., 1, 1, 1]
+                b = [gt["label"], gt["score"], gt["area"]] + gt["bbox"][2:]
                 vals.append(base_info + [iou, is_ok] + a + b)
 
     names = ["file_name", "t_label", "p_label", "p_score",
              "iou", "is_ok",
-             "label", "score", "w", "h",
-             "gt_label", "gt_score", "gt_w", "gt_h"]
+             "label", "score", "area", "w", "h",
+             "gt_label", "gt_score", "gt_area", "gt_w", "gt_h"]
     data = [{a: b for a, b in zip(names, val)} for val in vals]
 
     if splits > 0:
@@ -134,10 +134,11 @@ def hip_test_image(results, splits=0):
     vals = []
     for file_name, target, predict, dts, gts in results:
         is_ok = "Y" if target == predict["label"] else "N"
-        vals.append([file_name, target,
-                     predict["label"], predict["score"], is_ok])
+        vals.append([file_name, target, len(gts),
+                     len(dts), predict["label"], predict["score"], is_ok])
 
-    names = ["file_name", "t_label", "p_label", "p_score", "is_ok"]
+    names = ["file_name", "t_label", "n_gt",
+             "n_dt", "p_label", "p_score", "is_ok"]
     data = [{a: b for a, b in zip(names, val)} for val in vals]
 
     if splits > 0:

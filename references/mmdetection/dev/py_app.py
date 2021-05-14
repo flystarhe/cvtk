@@ -29,6 +29,7 @@ def json_encode(_result, _classes):
         for tl_x, tl_y, br_x, br_y, score in bboxes.tolist():
             dt = dict(
                 bbox=[tl_x, tl_y, br_x - tl_x, br_y - tl_y],
+                area=(br_x - tl_x) * (br_y - tl_y),
                 xyxy=[tl_x, tl_y, br_x, br_y],
                 label=label, score=score,
             )

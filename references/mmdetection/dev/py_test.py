@@ -8,7 +8,6 @@ from pathlib import Path
 from collections import defaultdict
 from cvtk.io import load_json, load_pkl, save_json, save_pkl
 from cvtk.utils.abc.gen import image_label
-from cvtk.utils.abc.nms import xywh2xyxy
 from scipy.stats import rankdata
 
 IMG_EXTENSIONS = set([".jpg", ".jpeg", ".png", ".bmp"])
@@ -77,7 +76,6 @@ def test_coco(data_root, coco_file, gpus, config, checkpoint, batch_size=1, work
         im2gts = defaultdict(list)
         for a in coco["annotations"]:
             a["label"] = id2label[a["category_id"]]
-            a["xyxy"] = xywh2xyxy(a["bbox"])
             a["score"] = 1.0
             im2gts[a["image_id"]].append(a)
 
