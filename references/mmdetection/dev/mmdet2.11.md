@@ -35,7 +35,7 @@ python -m cvtk coco4kps 500 ${out_dir}/coco.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
 coco_file=keep_p_samples/01/train.json
-output_dir=${coco_dir}_draw
+output_dir=${coco_dir}_DRAW
 options='{"include":"/workspace/results/selected_csv"}'
 python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
@@ -113,7 +113,7 @@ test_pipeline = [
 ]
 
 xlr = 1
-times = 1
+times = 2
 classes = None
 num_classes = 20
 data_root = '/workspace/datasets/xxxx'
@@ -206,11 +206,12 @@ f'WORK_DIR: {WORK_DIR}'
 %%time
 import os
 
-times = 1
-work_dir = WORK_DIR
-config = os.path.basename(CONFIG)
+times = 2
 data_root = '/workspace/datasets/xxxx'
 coco_file = 'keep_p_samples/01/train.json'
+
+work_dir = WORK_DIR
+config = os.path.basename(CONFIG)
 
 gpus = 2
 config_file = os.path.join(work_dir, config)
