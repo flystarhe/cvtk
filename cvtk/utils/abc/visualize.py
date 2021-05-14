@@ -108,9 +108,15 @@ def display_test(results, score_thr, output_dir, **kw):
             dts = clean_by_bbox(dts, clean_mode, clean_param)
 
         img = cv.imread(str(file_name), 1)
+
         text = "/".join(file_name.parts[:-1][-3:])
-        cv.putText(img, f"target: {text}", (15, 30),
-                   cv.FONT_HERSHEY_COMPLEX, 1.0, (255, 0, 0))
+        cv.putText(img, f"{target} {text}", (15, 30),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 255, 0))
+
+        data = [predict["label"], predict["score"]]
+        cv.putText(img, f"{data}", (15, 60),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
+
         img = draw_bbox(img, dts, offset=0, color_val=(0, 0, 255))
         img = draw_bbox(img, gts, offset=30, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
