@@ -76,6 +76,7 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
         dts = [dt for dt in dts
                if dt["score"] >= get_val(score_thr, dt["label"], 0.3)]
         ious = bbox_overlaps(dts, gts, match_mode)
+        n_gt, n_dt = len(gts), len(dts)
 
         base_info = [file_name, target, predict["label"], predict["score"]]
 
@@ -89,7 +90,7 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
                 if iou >= min_pos_iou:
                     a = [dt["label"], dt["score"], dt["area"]] + dt["bbox"][2:]
                     b = [gt["label"], gt["score"], gt["area"]] + gt["bbox"][2:]
-                    vals.append(base_info + [iou, is_ok] + a + b)
+                    vals.append(base_info + [iou, is_ok, n_gt, n_dt] + a + b)
                     exclude_i.add(i)
                     exclude_j.add(j)
 
@@ -101,17 +102,17 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
             if i not in exclude_i:
                 a = [dt["label"], dt["score"], dt["area"]] + dt["bbox"][2:]
                 b = ["none", 0., 1, 1, 1]
-                vals.append(base_info + [iou, is_ok] + a + b)
+                vals.append(base_info + [iou, is_ok, n_gt, n_dt] + a + b)
 
         for j, gt in enumerate(gts):
             gt = gts[j]
             if j not in exclude_j:
                 a = ["none", 0., 1, 1, 1]
                 b = [gt["label"], gt["score"], gt["area"]] + gt["bbox"][2:]
-                vals.append(base_info + [iou, is_ok] + a + b)
+                vals.append(base_info + [iou, is_ok, n_gt, n_dt] + a + b)
 
     names = ["file_name", "t_label", "p_label", "p_score",
-             "iou", "is_ok",
+             "iou", "is_ok", "n_gt", "n_dt",
              "label", "score", "area", "w", "h",
              "gt_label", "gt_score", "gt_area", "gt_w", "gt_h"]
     data = [{a: b for a, b in zip(names, val)} for val in vals]
