@@ -1,20 +1,20 @@
 # mmdet v2
-- [mmdetection v2.11.0](https://github.com/open-mmlab/mmdetection)
-- [mmcv 1.3.3](https://github.com/open-mmlab/mmcv)
+- [mmdetection v2.10.0](https://github.com/open-mmlab/mmdetection)
+- [mmcv 1.2.7](https://github.com/open-mmlab/mmcv)
 
 ## docker
 - Python: 3.8
 - PyTorch: 1.7.1
 - MMDET: `/usr/src/mmdetection`
-- [http://ip:7000/?token=hi](#) for `dev`
+- [http://ip:7000/?token=hi](#) for `dev` mode
 - `/usr/sbin/sshd -D -p 7000` for `ssh` mode
 - `python /workspace/app_tornado.py 7000 ${@:2}` for `app` mode
 
 ```sh
-docker pull flystarhe/mmdet:2.11-mmcv1.3-torch1.7-cuda11.0
+docker pull flystarhe/mmdet:2.10-mmcv1.2-torch1.7-cuda11.0
 
 n=test
-t=flystarhe/mmdet:2.11-mmcv1.3-torch1.7-cuda11.0
+t=flystarhe/mmdet:2.10-mmcv1.2-torch1.7-cuda11.0
 docker run --gpus device=0 -d -p 7000:9000 --ipc=host --name ${n} -v "$(pwd)"/${n}:/workspace ${t} [dev|ssh|app]
 
 docker update --restart=always ${n}
@@ -22,20 +22,21 @@ docker update --restart=always ${n}
 
 ## data
 ```sh
-#%%bash
+%%bash
+ln -snf /root/hej/zhgd2 /workspace
 
-img_dir=dataset
+img_dir=/workspace/datasets/xxxx
 ann_dir=${img_dir}
-out_dir=${img_dir}_E32
+out_dir=${img_dir}_E64
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
-python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
+python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 64
 
 python -m cvtk coco4kps 500 ${out_dir}/coco.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
 coco_file=keep_p_samples/01/train.json
-output_dir=${coco_dir}_DRAW
+output_dir=${coco_dir}_viz
 options='{"include":"/workspace/results/selected_csv"}'
 python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
@@ -48,8 +49,8 @@ python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${opti
 
 results=/workspace/results/pkl_file
 score_thr='{"*":0.3}'
-output_dir=/workspace/results/pkl_file_stem
-options='{"include":"/workspace/results/selected_csv"}'
+output_dir=${results%.*}_viz
+options='{"include":"/workspace/results/selected_csv","clean_mode":"dist","clean_param":1.0}'
 python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 
@@ -240,7 +241,7 @@ cfg_model = dict(
     ),
     rpn_head=dict(
         anchor_generator=dict(
-            scales=[4],
+            scales=[8],
             ratios=[0.5, 1.0, 2.0],
             strides=[8, 16, 32, 64, 128],
         ),
@@ -289,6 +290,7 @@ cfg_lr_config = dict(
 )
 
 from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image
+!ln -snf /root/hej/zhgd2 /workspace
 
 coco_file = ''
 hip_coco(coco_file, crop_size=800, splits=2, scales=[8], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
