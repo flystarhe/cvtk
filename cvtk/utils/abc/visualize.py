@@ -25,7 +25,7 @@ def draw_bbox(img, anns, offset=0, color_val=(0, 0, 255)):
         x, y, w, h = map(int, ann["bbox"])
         cv.rectangle(img, (x, y), (x + w, y + h), color_val, thickness=2)
 
-        if y >= 60:
+        if y >= 120:
             left_bottom = (x, y - offset)
         elif h >= img_h * 0.5:
             left_bottom = (x, y + h - offset)
@@ -48,34 +48,35 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
     output_dir = Path(output_dir)
     shutil.rmtree(output_dir, ignore_errors=True)
 
-    targets = None
+    include_stems = None
     if include is not None:
-        targets = pd.read_csv(include)["file_name"].tolist()
-        targets = set([Path(file_name).stem for file_name in targets])
+        include_stems = pd.read_csv(include)["file_name"].tolist()
+        include_stems = set([Path(file_name).stem
+                             for file_name in include_stems])
 
     id2name = {c["id"]: c["name"] for c in coco["categories"]}
 
-    cache = defaultdict(list)
+    dataset = defaultdict(list)
     for ann in coco["annotations"]:
         ann["label"] = id2name[ann["category_id"]]
-        cache[ann["image_id"]].append(ann)
-
-    targets, imgs = [], []
-    for img in coco["images"]:
-        targets.append(cache[img["id"]])
-        imgs.append(coco_dir / img["file_name"])
+        dataset[ann["image_id"]].append(ann)
 
     output_dir.mkdir(parents=True)
-    for gts, file_name in zip(targets, imgs):
-        file_name = Path(file_name)
+    for img in coco["images"]:
+        gts = dataset[img["id"]]
+        file_name = img["file_name"]
 
-        if targets is not None and file_name.stem not in targets:
+        file_name = coco_dir / file_name
+
+        if include_stems is not None and file_name.stem not in include_stems:
             continue
 
         img = cv.imread(str(file_name), 1)
-        text = "/".join(file_name.parts[:-1][-3:])
-        cv.putText(img, f"target: {text}", (15, 30),
-                   cv.FONT_HERSHEY_COMPLEX, 1.0, (255, 0, 0))
+
+        text = "target {}".format(file_name.parts[:-1][-3:])
+        cv.putText(img, text, (15, 30),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
+
         img = draw_bbox(img, gts, offset=0, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
@@ -91,15 +92,16 @@ def display_test(results, score_thr, output_dir, **kw):
         shutil.copy(results, output_dir)
         results = load_pkl(results)
 
-    targets = None
+    include_stems = None
     if include is not None:
-        targets = pd.read_csv(include)["file_name"].tolist()
-        targets = set([Path(file_name).stem for file_name in targets])
+        include_stems = pd.read_csv(include)["file_name"].tolist()
+        include_stems = set([Path(file_name).stem
+                             for file_name in include_stems])
 
     for file_name, target, predict, dts, gts in results:
         file_name = Path(file_name)
 
-        if targets is not None and file_name.stem not in targets:
+        if include_stems is not None and file_name.stem not in include_stems:
             continue
 
         dts = [d for d in dts
@@ -109,13 +111,18 @@ def display_test(results, score_thr, output_dir, **kw):
 
         img = cv.imread(str(file_name), 1)
 
-        text = "/".join(file_name.parts[:-1][-3:])
-        cv.putText(img, f"{target} {text}", (15, 30),
-                   cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 255, 0))
-
-        data = [predict["label"], predict["score"]]
-        cv.putText(img, f"{data}", (15, 60),
+        text = "{} {}".format(target, file_name.parts[:-1][-3:])
+        cv.putText(img, text, (15, 30),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
+
+        text = "{label} {score:.2f} {bbox}".format(**predict)
+        cv.putText(img, text, (15, 60),
+                   cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
+
+        for i, d in enumerate(dts, 1):
+            text = "{} {label} {score:.2f} {bbox}".format(i, **d)
+            cv.putText(img, text, (15, 60 + 30 * i),
+                       cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
         img = draw_bbox(img, dts, offset=0, color_val=(0, 0, 255))
         img = draw_bbox(img, gts, offset=30, color_val=(0, 255, 0))
