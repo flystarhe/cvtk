@@ -127,6 +127,6 @@ def display_test(results, score_thr, output_dir, **kw):
                        cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
         img = draw_bbox(img, dts, offset=10, color_val=(0, 0, 255))
-        img = draw_bbox(img, gts, offset=40, color_val=(0, 255, 0))
+        img = draw_bbox(img, gts, offset=50, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
