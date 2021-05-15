@@ -74,10 +74,10 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
         img = cv.imread(str(file_name), 1)
 
         text = "target {}".format(file_name.parts[:-1][-3:])
-        cv.putText(img, text, (15, 30),
+        cv.putText(img, text, (20, 40),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
-        img = draw_bbox(img, gts, offset=5, color_val=(0, 255, 0))
+        img = draw_bbox(img, gts, offset=10, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
 
@@ -112,21 +112,21 @@ def display_test(results, score_thr, output_dir, **kw):
         img = cv.imread(str(file_name), 1)
 
         text = "{} {}".format(target, file_name.parts[:-1][-3:])
-        cv.putText(img, text, (15, 30),
+        cv.putText(img, text, (20, 40),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
         predict["bbox"] = list(map(int, predict["bbox"]))
         text = "{label} {score:.2f} {bbox}".format(**predict)
-        cv.putText(img, text, (15, 60),
+        cv.putText(img, text, (20, 80),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
         for i, d in enumerate(dts, 1):
             d["bbox"] = list(map(int, d["bbox"]))
             text = "{} {label} {score:.2f} {bbox}".format(i, **d)
-            cv.putText(img, text, (15, 60 + 30 * i),
+            cv.putText(img, text, (20, 80 + 40 * i),
                        cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
-        img = draw_bbox(img, dts, offset=5, color_val=(0, 0, 255))
-        img = draw_bbox(img, gts, offset=35, color_val=(0, 255, 0))
+        img = draw_bbox(img, dts, offset=10, color_val=(0, 0, 255))
+        img = draw_bbox(img, gts, offset=40, color_val=(0, 255, 0))
         cv.imwrite(str(output_dir / file_name.name), img)
     return str(output_dir)
