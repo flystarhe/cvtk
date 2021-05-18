@@ -7,6 +7,8 @@ TM_MINIMUM_METHODS = (cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED)
 
 
 def binary_matching(image, templ, method=cv.TM_CCOEFF_NORMED):
+    if isinstance(method, str):
+        method = getattr(cv, method)
     res = cv.matchTemplate(image, templ, method)
 
     min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
