@@ -33,21 +33,19 @@ def revise_templ(templ, image, **kw):
     radius = kw.pop("radius", 10)
     kernel = disk(radius=radius)
 
+    shape = (radius * 2 + 1, radius * 2 + 1)
+    kernel_ext = np.ones(shape, np.uint8)
+
     erosion = binary_erode(templ, kernel)
-    dilation = binary_dilate(templ, kernel)
+    region = templ - erosion
 
-    rng1 = templ - erosion
-    rng2 = dilation - templ
+    bg = cv.bitwise_not(image)
+    bg_region = cv.bitwise_and(region, bg)
 
-    kernel = disk(radius=radius // 2 + 1)
-    fg = binary_closing(image, kernel)
-    bg = cv.bitwise_not(fg)
+    templ = templ - bg_region
+    templ = binary_closing(templ, kernel_ext)
 
-    rng_del = cv.bitwise_and(rng1, bg)
-
-    rng_add = cv.bitwise_and(rng2, fg)
-
-    return cv.bitwise_or(rng_add, templ - rng_del)
+    return templ
 
 
 def revise_templ2(templ, image,  **kw):
