@@ -83,7 +83,7 @@ def aligned_pairs(image, templ, mode="center", factor=0.7, **kw):
 
 def ez_pairs(image, templ, mode="center", factor=0.7, **kw):
     # kernel = disk(radius=kw.pop("radius", 1))
-    kernel = np.ones((3, 3), dtype=np.uint8)
+    kernel = np.ones((5, 5), dtype=np.uint8)
     threshold = kw.get("threshold", 0.9)
 
     data = []

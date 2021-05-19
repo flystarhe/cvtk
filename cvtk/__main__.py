@@ -37,7 +37,6 @@ def args_coco_build(args=None):
     mapping = kw.pop("mapping")
     if mapping is not None:
         kw["mapping"] = eval(mapping)
-
     return kw
 
 
@@ -113,7 +112,6 @@ def args_gen_test(args=None):
     options = kw.pop("options")
     if options is not None:
         kw.update(eval(options))
-
     return kw
 
 
@@ -151,7 +149,6 @@ def args_display_coco(args=None):
     options = kw.pop("options")
     if options is not None:
         kw.update(eval(options))
-
     return kw
 
 
@@ -173,7 +170,6 @@ def args_display_test(args=None):
     options = kw.pop("options")
     if options is not None:
         kw.update(eval(options))
-
     return kw
 
 
@@ -207,7 +203,7 @@ def _main(args=None):
         kw = args_coco_build(args)
         print(f"kwargs: {kw}")
         return coco_build(**kw)
-    if task == "img-size":
+    elif task == "img-size":
         kw = args_image_size(args)
         print(f"kwargs: {kw}")
         return image_size(**kw)
@@ -242,9 +238,11 @@ def _main(args=None):
         print(f"kwargs: {kw}")
         return display_test(**kw)
     elif task == "-h" or task == "--help":
-        print("usage: python -m cvtk command ...\n", help_doc_str)
+        print("usage: python -m cvtk command ...")
     else:
-        print(f"unimplemented command: {task}\n", help_doc_str)
+        print(f"unimplemented command: {task}")
+
+    return help_doc_str
 
 
 # develop:
