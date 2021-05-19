@@ -29,31 +29,30 @@ def binary_erode(image, kernel, iterations=1):
     return cv.erode(image, kernel, iterations=iterations)
 
 
+def expand_region(templ, image, kernel):
+    pass
+
+
+def reduce_region(templ, image, kernel):
+    pass
+
+
 def revise_templ(templ, image, **kw):
     radius = kw.pop("radius", 10)
     kernel = disk(radius=radius)
 
-    shape = (radius * 2 + 1, radius * 2 + 1)
-    kernel_ext = np.ones(shape, np.uint8)
-
-    erosion = binary_erode(templ, kernel)
-    region = templ - erosion
-
-    bg = cv.bitwise_not(image)
-    bg_region = cv.bitwise_and(region, bg)
-
-    templ = templ - bg_region
-    templ = binary_closing(templ, kernel_ext)
+    for _ in range(3):
+        pass
 
     return templ
 
 
-def revise_templ2(templ, image,  **kw):
+def revise_templ2(templ, image, **kw):
     radius = kw.pop("radius", 10)
     kernel = disk(radius=radius)
 
-    shape = (radius * 2 + 1, radius * 2 + 1)
-    kernel_ext = np.ones(shape, np.uint8)
+    ksize = radius * 2 + 1
+    kernel_ext = np.ones((ksize, ksize), np.uint8)
 
     erosion = binary_erode(templ, kernel)
     region = templ - erosion
