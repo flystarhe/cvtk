@@ -1,6 +1,5 @@
 import argparse
 import cv2 as cv
-import numpy as np
 import torch
 from cvtk.io import load_json, save_pkl
 from mmcv.parallel import collate

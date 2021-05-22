@@ -8,7 +8,6 @@ from pathlib import Path
 from collections import defaultdict
 from cvtk.io import load_json, load_pkl, save_json, save_pkl
 from cvtk.utils.abc.gen import image_label
-from scipy.stats import rankdata
 
 IMG_EXTENSIONS = set([".jpg", ".jpeg", ".png", ".bmp"])
 G_COMMAND = "CUDA_VISIBLE_DEVICES={} python dev/py_app.py {} {} {} -b {}"
