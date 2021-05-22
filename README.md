@@ -7,6 +7,7 @@ computer vision toolkit of pytorch
 ```sh
 # pip install --upgrade setuptools wheel
 # pip install --upgrade twine
+rm -rf build dist *.egg-info
 python setup.py sdist bdist_wheel
 twine upload dist/*
 ```
