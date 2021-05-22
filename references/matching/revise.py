@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 from skimage.morphology import disk
 
-from morphology import binary_closing, binary_dilate, binary_erode
 from ops.connected_cv import neighbors2
+from ops.morphology import binary_closing, binary_dilate, binary_erode
 
 
 def expand_region(templ, image, kernel):
