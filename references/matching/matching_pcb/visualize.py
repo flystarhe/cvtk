@@ -3,7 +3,7 @@ import numpy as np
 from skimage.color import label2rgb
 from skimage.morphology import diamond
 
-from matching_ops.image import to_rgb
+from matching_pcb.image import to_rgb
 
 
 def _color(mask, color):
