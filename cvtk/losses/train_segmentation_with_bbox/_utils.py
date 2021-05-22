@@ -101,7 +101,7 @@ def _balance(target, weight):
         weight (Tensor[H, W]): probability of BG.
     """
     negative_mask = target.eq(0)
-    limit = 3 * target.gt(0).sum().item()
+    limit = 3 + 3 * target.gt(0).sum().item()
     if negative_mask.sum().item() > limit:
         p = weight[negative_mask].sort()[0][limit]
         target[negative_mask * weight.gt(p)] = -100

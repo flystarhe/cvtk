@@ -1,5 +1,4 @@
 # https://github.com/pytorch/vision/blob/master/references/classification/utils.py#L259
-import copy
 import re
 import sys
 from collections import OrderedDict

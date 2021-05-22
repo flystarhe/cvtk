@@ -7,7 +7,7 @@ import numpy as np
 from cvtk.io import load_json
 from torchvision.transforms import functional as F
 
-a_min, a_max = 32**2, 96**2
+a_min, a_max = 32**2, 128**2
 
 
 def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
@@ -21,12 +21,12 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
     x = np.clip(src_area, a_min, a_max)
     x = (x - a_min) / (a_max - a_min)
-    x = 1.0 - 0.5 * x - 1e-5
+    x = 1.0 - 0.5 * x + 1e-5
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
-    s3 = (dst_w >= src_w - 1) * (dst_h >= src_w * 2)
-    s4 = (dst_h >= src_h - 1) * (dst_w >= src_h * 2)
+    s3 = (dst_w >= src_w - 1) * (dst_h >= src_w * 3)
+    s4 = (dst_h >= src_h - 1) * (dst_w >= src_h * 3)
     ss = s1 + s2 + s3 + s4
 
     inner = (dst_w >= 4) * (dst_h >= 4)
@@ -106,8 +106,16 @@ class ToyDataset:
             x1, y1, x2, y2 = bboxes[ind].tolist()
             if x2 - x1 < self._crop_size:
                 x1 = max(0, np.random.randint(x2 - self._crop_size, x1))
+            else:
+                x1 = max(0, (x1 + x2 - self._crop_size) // 2)
+            _shift = np.random.randint(0, 64) - 32
+            x1 = x1 + _shift
             if y2 - y1 < self._crop_size:
                 y1 = max(0, np.random.randint(y2 - self._crop_size, y1))
+            else:
+                y1 = max(0, (y1 + y2 - self._crop_size) // 2)
+            _shift = np.random.randint(0, 64) - 32
+            y1 = y1 + _shift
             x2, y2 = x1 + self._crop_size, y1 + self._crop_size
 
             if x2 > img_w:

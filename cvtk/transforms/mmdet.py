@@ -4,7 +4,7 @@ from collections import defaultdict
 import cv2 as cv
 import numpy as np
 
-a_min, a_max = 32**2, 96**2
+a_min, a_max = 32**2, 128**2
 
 
 def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
@@ -18,7 +18,7 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
     x = np.clip(src_area, a_min, a_max)
     x = (x - a_min) / (a_max - a_min)
-    x = 1.0 - 0.5 * x - 1e-5
+    x = 1.0 - 0.5 * x + 1e-5
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
@@ -108,7 +108,7 @@ class RandomCrop(object):
             cx, cy = self.width // 2, self.height // 2
             x1, y1, x2, y2 = cx - 32, cy - 32, cx + 32, cy + 32
 
-            dst_img[y1: y2, x1: x2] = (255, 0, 0)
+            dst_img[y1: y2, x1: x2] = (0, 0, 255)
             # set the man-made object category in 1st group
             dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)
             dst_labels = np.array([0], dtype=np.int64)
