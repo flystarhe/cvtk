@@ -3,6 +3,7 @@ import traceback
 
 import cv2 as cv
 import numpy as np
+import pandas as pd
 
 npmode = None
 npimage = None
@@ -16,9 +17,6 @@ Press the left mouse button to start selecting the area.
 - press `q` to exit
 - press `r` to clear
 - press `m` change mode
-
-x1,y1,x2,y2
-channel,min,mean,median,max,q05,q25,q75,q95
 """
 
 
@@ -30,8 +28,8 @@ def _mode(npmode):
 def _text(text):
     global bgr_image
     font = cv.FONT_HERSHEY_SIMPLEX
-    cv.rectangle(bgr_image, (0, 0), (300, 40), (255, 255, 255), -1)
-    cv.putText(bgr_image, text, (20, 35), font, 1, (0, 0, 255), 2, cv.LINE_AA)
+    cv.rectangle(bgr_image, (0, 0), (400, 20), (255, 255, 255), -1)
+    cv.putText(bgr_image, text, (20, 15), font, 0.5, (0, 0, 255))
 
 
 def _info(mat, q=None):
@@ -40,9 +38,11 @@ def _info(mat, q=None):
     if q is None:
         q = [0.05, 0.25, 0.75, 0.95]
 
-    r1 = [func(nparr) for func in (np.min, np.mean, np.median, np.max)]
-    r2 = np.quantile(nparr, q, interpolation="nearest").tolist()
-    return ",".join([f"{x:4d}" for x in r1 + r2])
+    res = {f.__name__: int(f(nparr))
+           for f in (np.mean, np.median, np.min, np.max)}
+    v = np.quantile(nparr, q, interpolation="midpoint").tolist()
+    res.update({f"quantile@{qi:.2f}": int(vi) for qi, vi in zip(q, v)})
+    return res
 
 
 def _on_mouse(event, x, y, flags, param):
@@ -51,17 +51,20 @@ def _on_mouse(event, x, y, flags, param):
     if event == cv.EVENT_LBUTTONDOWN:
         ix, iy = x, y
     elif event == cv.EVENT_MOUSEMOVE:
-        vals = [f"{v:3d}" for v in npimage[y, x]]
-        _text(f"{npmode} // {vals}")
-        if ix >= 0 and iy >= 0:
+        vals = ",".join([f"{v:03d}" for v in npimage[y, x]])
+        _text(f"{npmode} - [{vals}]")
+
+        if x > ix > 0 and y > iy > 0:
             cv.rectangle(bgr_image, (ix, iy), (x, y), (0, 255, 0), -1)
     elif event == cv.EVENT_LBUTTONUP:
-        if ix >= 0 and iy >= 0:
-            cv.rectangle(bgr_image, (ix, iy), (x, y), (0, 255, 0), -1)
-            vals = [f"{v:3d}" for v in (ix, iy, x, y)]
-            print(f"{npmode} // {vals}")
-            for i in range(3):
-                print(_info(npimage[iy:y, ix:x, i]))
+        if x > ix > 0 and y > iy > 0:
+            cv.rectangle(bgr_image, (ix, iy), (x, y), (0, 0, 255), 2)
+
+            vals = ",".join([f"{v:03d}" for v in (ix, iy, x - ix, y - iy)])
+            print(f"\n{npmode} - xywh - [{vals}]")
+
+            print(pd.DataFrame([_info(npimage[iy:y, ix:x, i])
+                  for i in range(3)]))
         ix, iy = -1, -1
 
 
@@ -69,6 +72,7 @@ def color_range(image_path):
     global npmode, npimage, bgr_image
 
     _nparr = cv.imread(image_path, 1)
+    _nparr = _nparr[:800, :800]
 
     npmode = "BGR"
     npimage = _nparr.copy()
@@ -81,7 +85,7 @@ def color_range(image_path):
     while True:
         cv.imshow("Image", bgr_image)
 
-        key = cv.waitKey(1) & 0xFF
+        key = cv.waitKey(10) & 0xFF
 
         if key == ord("q"):
             break
@@ -89,11 +93,13 @@ def color_range(image_path):
             npmode = "BGR"
             npimage = _nparr.copy()
             bgr_image = _nparr.copy()
+            print("\n\nclear window...\n")
         elif key == ord("m"):
             npmode = _mode(npmode)
-            code = getattr(cv, f"COLOR_BGR2{npmode}")
-            npimage = cv.cvtColor(_nparr, code)
-            _text(f"{npmode} //")
+            if npmode != "BGR":
+                code = getattr(cv, f"COLOR_BGR2{npmode}")
+                npimage = cv.cvtColor(_nparr, code)
+            _text(f"{npmode} - [255,255,255]")
         elif key == 27:
             break
 
