@@ -23,14 +23,14 @@ docker update --restart=always ${n}
 ## data
 ```sh
 %%bash
-ln -snf /root/hej/zhgd2 /workspace
+#ln -snf /root/hej/zhgd2 /workspace
 
 img_dir=/workspace/datasets/xxxx
 ann_dir=${img_dir}
-out_dir=${img_dir}_E64
+out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
-python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 64
+python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
 
 python -m cvtk coco4kps 500 ${out_dir}/coco.json --stratified
 
