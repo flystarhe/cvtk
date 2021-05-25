@@ -129,18 +129,18 @@ test_pipeline = [
         ]),
 ]
 
-xlr = 1
+xlr = 1.0
 times = 2
 classes = None
 num_classes = 20
 data_root = '/workspace/datasets/xxxx'
 coco_file = 'keep_p_samples/01/train.json'
 group = 'task_name'
-project = f'lr_{xlr}x_epochs_{times}x'
+project = f'lr_{xlr}_epochs_{times}x'
 
 cfg_data = dict(
-    samples_per_gpu=4,
-    workers_per_gpu=4,
+    samples_per_gpu=2,
+    workers_per_gpu=2,
     train=dict(
         type='CocoDataset',
         ann_file=os.path.join(data_root, coco_file),
@@ -185,8 +185,9 @@ cfg_lr_config = dict(
     _delete_=True,
     policy='Step',
     step=[8 * times, 11 * times],
+    gamma=0.1,
     warmup='linear',
-    warmup_iters=500,
+    warmup_iters=1500,
     warmup_ratio=0.001,
 )
 
@@ -198,7 +199,7 @@ cfg_log_config = dict(
 )
 
 cfg_options = dict(
-    optimizer=dict(type='SGD', lr=0.01 * xlr, momentum=0.9, weight_decay=0.0001),
+    optimizer=dict(type='SGD', lr=0.005 * xlr, momentum=0.9, weight_decay=0.0001),
     runner=dict(type='EpochBasedRunner', max_epochs=12 * times),
     evaluation=dict(interval=2, metric='bbox'),
     checkpoint_config=dict(interval=1),
@@ -275,17 +276,6 @@ cfg_model = dict(
 
 cfg_lr_config = dict(
     _delete_=True,
-    policy='Step',
-    step=[8 * times, 11 * times],
-    gamma=0.1,
-    min_lr=1e-7,
-    warmup='linear',
-    warmup_iters=1500,
-    warmup_ratio=0.001,
-)
-
-cfg_lr_config = dict(
-    _delete_=True,
     policy='CosineAnnealing',
     by_epoch=False,
     min_lr_ratio=1e-5,
@@ -297,7 +287,7 @@ cfg_lr_config = dict(
 cfg_lr_config = dict(
     _delete_=True,
     policy='OneCycle',
-    max_lr=0.01 * xlr,
+    max_lr=0.005 * xlr,
     pct_start=0.3,
     anneal_strategy='cos',
     div_factor=25,
