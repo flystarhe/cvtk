@@ -32,7 +32,8 @@ include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
 python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
 
-python -m cvtk coco4kps 500 ${out_dir}/coco.json --stratified
+python -m cvtk coco4kps 1000 ${out_dir}/coco.json --stratified
+python -m cvtk coco4kps 0.8 ${out_dir}/coco.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
 coco_file=keep_p_samples/01/train.json
@@ -60,7 +61,7 @@ from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image
 #!ln -snf /root/hej/zhgd2 /workspace
 
 coco_file = ''
-hip_coco(coco_file, crop_size=800, splits=2, scales=[8], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
+hip_coco(coco_file, crop_size=1280, splits=2, scales=[16], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
 
 results = ''
 score_thr = {"*": 0.3}
