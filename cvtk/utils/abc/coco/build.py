@@ -158,6 +158,8 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         try:
             nparr = cv.imread(str(img_path), 1)
             assert min(nparr.shape[:2]) > 32, "image size is too small"
+            if img_w + img_h == 0:
+                img_h, img_w = nparr.shape[:2]
             assert (img_h, img_w) == nparr.shape[:2], "image size not equal"
         except Exception as e:
             print(f"bad-image: {img_path}\n  {e}")
