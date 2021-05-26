@@ -23,7 +23,7 @@ docker update --restart=always ${n}
 ## data
 ```sh
 %%bash
-#ln -snf /root/hej/zhgd2 /workspace
+ln -snf /root/hej/zhgd2 /workspace
 
 img_dir=/workspace/datasets/xxxx
 ann_dir=${img_dir}
@@ -57,8 +57,8 @@ python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 
 **cvtk.utils.abc.discover:**
 ```jupyter
+!ln -snf /root/hej/zhgd2 /workspace
 from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image
-#!ln -snf /root/hej/zhgd2 /workspace
 
 coco_file = ''
 hip_coco(coco_file, crop_size=1280, splits=2, scales=[16], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
