@@ -7,7 +7,7 @@ import numpy as np
 from cvtk.io import load_json
 from torchvision.transforms import functional as F
 
-a_min, a_max = 32**2, 128**2
+a_min, a_max = 64**2, 192**2
 
 
 def _check_bboxes(src_bboxes, dst_bboxes, nonignore):

@@ -32,7 +32,7 @@ include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
 python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
 
-python -m cvtk coco4kps 1000 ${out_dir}/coco.json --stratified
+python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
 python -m cvtk coco4kps 0.8 ${out_dir}/coco.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
@@ -103,11 +103,31 @@ def clean_models(work_dir, n=2):
 ## train
 ```python
 %%time
+albu_train_transforms = [
+    dict(type='GaussNoise', var_limit=[10, 30], p=0.5),
+    dict(type='RandomRotate90', p=0.5),
+]
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        type='Albu',
+        transforms=albu_train_transforms,
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            min_visibility=0.0,
+            filter_lost_elements=True),
+        keymap={
+            'img': 'image',
+            'gt_masks': 'masks',
+            'gt_bboxes': 'bboxes'
+        },
+        update_pad_shape=False,
+        skip_img_without_anno=True),
     dict(type='Resize', test_mode=True, multi_scale=[]),
     dict(type='RandomCrop', height=800, width=800),
     dict(type='RandomFlip', flip_ratio=0.5, direction=['horizontal', 'vertical', 'diagonal']),
@@ -170,7 +190,7 @@ cfg_model = dict(
     ),
     rpn_head=dict(
         anchor_generator=dict(
-            scales=[8],
+            scales=[16],
             ratios=[0.5, 1.0, 2.0],
             strides=[4, 8, 16, 32, 64],
         ),
