@@ -259,7 +259,11 @@ batch_size = 1
 workers_per_gpu = 2
 
 ARG_TEST = f'{data_root} {coco_file} {gpus} {config_file} {checkpoint_file} {batch_size} {workers_per_gpu}'
-!python dev/py_test.py {ARG_TEST}
+logs = !python dev/py_test.py {ARG_TEST}
+print(logs)
+
+from cvtk.utils.abc.discover import hardmini_test
+hardmini_test(logs, level='image', score=0.85, nok=True)
 ```
 
 ## notes

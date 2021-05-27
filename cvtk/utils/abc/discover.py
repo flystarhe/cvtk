@@ -1,5 +1,6 @@
 import hiplot as hip
 import numpy as np
+import pandas as pd
 from cvtk.io import load_json, load_pkl
 from cvtk.utils.abc.nms import bbox_overlaps
 
@@ -36,7 +37,7 @@ def split_file_name(data, n=1):
     return [{**d, **_split(d["file_name"])} for d in data]
 
 
-def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0]):
+def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0], silent=False):
     anchors = [s * x for s in scales for x in base_sizes]
 
     coco = load_json(coco_file)
@@ -54,11 +55,15 @@ def hip_coco(coco_file, crop_size, splits=0, scales=[8], base_sizes=[4, 8, 16, 3
 
     if splits > 0:
         data = split_file_name(data, splits)
+
+    if silent:
+        return data
+
     hip.Experiment.from_iterable(data).display()
     return "jupyter.hiplot"
 
 
-def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.25):
+def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.25, silent=False):
     """Show model prediction results, allow gts is empty.
 
     Args:
@@ -119,11 +124,15 @@ def hip_test(results, splits=0, score_thr=None, match_mode="iou", min_pos_iou=0.
 
     if splits > 0:
         data = split_file_name(data, splits)
+
+    if silent:
+        return data
+
     hip.Experiment.from_iterable(data).display()
     return "jupyter.hiplot"
 
 
-def hip_test_image(results, splits=0):
+def hip_test_image(results, splits=0, silent=False):
     """Show model prediction results, allow gts is empty.
 
     Args:
@@ -144,5 +153,28 @@ def hip_test_image(results, splits=0):
 
     if splits > 0:
         data = split_file_name(data, splits)
+
+    if silent:
+        return data
+
     hip.Experiment.from_iterable(data).display()
     return "jupyter.hiplot"
+
+
+def hardmini_test(logs, level="image", score=0.85, nok=True):
+    pkl_list = [l.strip() for l in logs.split("\n") if ".pkl" in l]
+    assert len(pkl_list) == 1, f"Input must be one and only one: {pkl_list}"
+
+    pkl_file = pkl_list[0]
+    if level == "image":
+        data = hip_test_image(pkl_file, splits=0, silent=True)
+        data = [d for d in data if d["p_score"] < score]
+        if nok:
+            data += [d for d in data if d["is_ok"] == "N"]
+    else:
+        data = [{"file_name": "none"}]
+
+    f = pkl_file + ".csv"
+    df = pd.DataFrame(data)
+    df.to_csv(f, index=False)
+    return f
