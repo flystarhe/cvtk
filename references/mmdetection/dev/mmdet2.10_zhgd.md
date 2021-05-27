@@ -64,8 +64,8 @@ coco_file = ''
 hip_coco(coco_file, crop_size=1280, splits=2, scales=[16], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
 
 results = ''
-score_thr = {"*": 0.3}
-hip_test(results, splits=2, score_thr=score_thr, match_mode="iou", min_pos_iou=0.25)
+score_thr = {'*': 0.3}
+hip_test(results, splits=2, score_thr=score_thr, match_mode='iou', min_pos_iou=0.25)
 
 results = ''
 hip_test_image(results, splits=2)
