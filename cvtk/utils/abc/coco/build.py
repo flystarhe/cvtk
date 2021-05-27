@@ -95,16 +95,21 @@ def make_imdb(img_dir, ann_dir, include=None):
     imdb = []
     label_files = []
     for img_path, ann_path in _filter(img_dir, ann_dir, include):
-        if ann_path.suffix == ".xml":
-            label_files.append(ann_path)
-            ann_data = xml2json(ann_path)
-        elif ann_path.suffix == ".json":
-            label_files.append(ann_path)
-            ann_data = load_json(ann_path)
-        else:
-            ann_data = dict(shapes=[], imageWidth=0, imageHeight=0)
+        try:
+            if ann_path.suffix == ".xml":
+                label_files.append(ann_path)
+                ann_data = xml2json(ann_path)
+            elif ann_path.suffix == ".json":
+                label_files.append(ann_path)
+                ann_data = load_json(ann_path)
+            elif ann_path.suffix in IMG_EXTENSIONS:
+                ann_data = dict(shapes=[], imageWidth=0, imageHeight=0)
+            else:
+                assert False, f"{ann_path.suffix} not supported"
 
-        imdb.append((ann_data, img_path, img_path.relative_to(img_dir)))
+            imdb.append((ann_data, img_path, img_path.relative_to(img_dir)))
+        except Exception as e:
+            print(f"{ann_path.name} - {e}")
     return imdb, label_files
 
 

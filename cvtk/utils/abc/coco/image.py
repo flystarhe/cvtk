@@ -10,9 +10,12 @@ def count_image_size(img_dir, **kw):
     data = defaultdict(int)
 
     for img_path in Path(img_dir).glob("**/*"):
-        if img_path.suffix in IMG_EXTENSIONS:
-            img = Image.open(img_path)
-            data[img.size] += 1
+        try:
+            if img_path.suffix in IMG_EXTENSIONS:
+                img = Image.open(img_path)
+                data[img.size] += 1
+        except Exception as e:
+            print(f"{img_path.name} - {e}")
 
     data = [(k[0], k[1], v) for k, v in data.items()]
     data = sorted(data, key=lambda x: x[0])
