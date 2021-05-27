@@ -38,20 +38,20 @@ python -m cvtk coco4kps 0.8 ${out_dir}/coco.json --stratified
 coco_dir=/workspace/datasets/xxxx
 coco_file=keep_p_samples/01/train.json
 output_dir=${coco_dir}_viz
-options='{"include":"/workspace/results/selected_csv"}'
+options='{"include":"/workspace/notebooks/selected_csv"}'
 python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
-results=/workspace/results/pkl_file
+results=/workspace/notebooks/pkl_file
 mode=complex
 score_thr='{"*":0.3}'
 label_grade='{"*":1}'
 options='{"clean_mode":"dist","clean_param":1.0}'
 python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${options}
 
-results=/workspace/results/pkl_file
+results=/workspace/notebooks/pkl_file
 score_thr='{"*":0.3}'
 output_dir=${results%.*}_viz
-options='{"include":"/workspace/results/selected_csv"}'
+options='{"include":"/workspace/notebooks/selected_csv"}'
 python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 
@@ -75,6 +75,7 @@ hip_test_image(results, splits=2)
 ```python
 %cd /workspace/cvtk/references/mmdetection
 import os
+import ipynbname
 
 MMDET_PATH = '/usr/src/mmdetection'
 os.environ['MMDET_PATH'] = MMDET_PATH
@@ -156,8 +157,7 @@ classes = None
 num_classes = 20
 data_root = '/workspace/datasets/xxxx'
 coco_file = 'keep_p_samples/01/train.json'
-group = 'task_name'
-project = f'lr_{xlr}_epochs_{times}x'
+project = ipynbname.name()
 
 cfg_data = dict(
     samples_per_gpu=2,
@@ -230,7 +230,7 @@ cfg_options = dict(
     data=cfg_data)
 os.environ['CFG_OPTIONS'] = str(cfg_options)
 
-WORK_DIR = '/workspace/results/{}/{}'.format(group, project)
+WORK_DIR = '/workspace/notebooks/{}'.format(project)
 CONFIG = os.path.join(MMDET_PATH, 'configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
 
 ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, WORK_DIR)
