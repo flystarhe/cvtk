@@ -163,7 +163,7 @@ def hip_test_image(results, splits=0, silent=False):
 
 def hardmini_test(logs, level="image", score=0.85, nok=True):
     pkl_list = [line.strip() for line in logs if ".pkl" in line]
-    assert len(pkl_list) == 1, f"Input must be one and only one: {pkl_list}"
+    assert len(pkl_list) == 1, f"must be one and only one: {pkl_list}"
 
     pkl_file = pkl_list[0]
     if level == "image":
