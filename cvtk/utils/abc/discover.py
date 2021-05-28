@@ -168,14 +168,18 @@ def hardmini_test(logs, level="image", score=0.85, nok=True):
     pkl_file = pkl_list[0]
     if level == "image":
         data = hip_test_image(pkl_file, splits=0, silent=True)
-        data = [d for d in data if d["p_score"] < score]
         if nok:
-            data += [d for d in data if d["is_ok"] == "N"]
+            data = [d for d in data
+                    if d["p_score"] < score or d["is_ok"] == "N"]
+        else:
+            data = [d for d in data if d["p_score"] < score]
     elif level == "object":
         data = hip_test(pkl_file, splits=0, silent=True)
-        data = [d for d in data if d["score"] < score]
         if nok:
-            data += [d for d in data if d["is_ok"] == "N"]
+            data = [d for d in data
+                    if d["score"] < score or d["is_ok"] == "N"]
+        else:
+            data = [d for d in data if d["score"] < score]
     else:
         data = [{"file_name": "none"}]
 

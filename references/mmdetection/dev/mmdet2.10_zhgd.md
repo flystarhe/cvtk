@@ -82,7 +82,7 @@ cfg_times = 3
 cfg_classes = []
 cfg_num_classes = 20
 cfg_albu_p = 0.5
-cfg_project_name = 'ipynbname.name()'
+cfg_experiment_path = './tmp/ipynbname'
 cfg_train_data_root = '/workspace/datasets/xxxx'
 cfg_train_coco_file = 'keep_p_samples/01/train.json'
 cfg_val_data_root = '/workspace/datasets/xxxx'
@@ -241,14 +241,12 @@ cfg_options = dict(
     data=cfg_data)
 os.environ['CFG_OPTIONS'] = str(cfg_options)
 
-WORK_DIR = '/workspace/notebooks/{}'.format(cfg_project_name)
 CONFIG = os.path.join(MMDET_PATH, 'configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
-
-ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, WORK_DIR)
+ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, cfg_experiment_path)
 !python -m torch.distributed.launch --nproc_per_node=2 dev/py_train.py {ARG_TRAIN}
-DEL_FILES = ' '.join(clean_models(WORK_DIR, 2))
+DEL_FILES = ' '.join(clean_models(cfg_experiment_path, 2))
 logs = !rm -rfv {DEL_FILES}
-f'WORK_DIR: {WORK_DIR}'
+cfg_experiment_path
 ```
 
 ## test
@@ -260,7 +258,7 @@ times = cfg_times#2
 data_root = cfg_test_data_root#'/workspace/datasets/xxxx'
 coco_file = cfg_test_coco_file#'keep_p_samples/01/train.json'
 
-work_dir = WORK_DIR
+work_dir = cfg_experiment_path
 config = os.path.basename(CONFIG)
 
 gpus = 2
