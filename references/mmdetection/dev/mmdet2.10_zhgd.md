@@ -20,10 +20,10 @@ docker run --gpus device=0 -d -p 7000:9000 --ipc=host --name ${n} -v "$(pwd)"/${
 docker update --restart=always ${n}
 ```
 
-## data
+## scripts
+在容器外运行程序，请先执行命令`ln -snf /root/hej/zhgd2 /workspace`完成路径映射。
 ```sh
 %%bash
-ln -snf /root/hej/zhgd2 /workspace
 
 img_dir=/workspace/datasets/xxxx
 ann_dir=${img_dir}
@@ -33,11 +33,13 @@ mapping='{"HARD":"__DEL"}'
 python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
 
 python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
-python -m cvtk coco4kps 0.8 ${out_dir}/coco.json --stratified
+
+cp -u ${out_dir}/keep_p_samples/01/all.json ${out_dir}/coco_.json
+python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
 coco_file=keep_p_samples/01/train.json
-output_dir=${coco_dir}_viz
+output_dir=${coco_dir}_VIZ
 options='{"include":"/workspace/notebooks/selected_csv"}'
 python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
@@ -50,15 +52,14 @@ python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${opti
 
 results=/workspace/notebooks/pkl_file
 score_thr='{"*":0.3}'
-output_dir=${results%.*}_viz
+output_dir=${results%.*}_VIZ
 options='{"include":"/workspace/notebooks/selected_csv"}'
 python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 
 **cvtk.utils.abc.discover:**
 ```jupyter
-!ln -snf /root/hej/zhgd2 /workspace
-from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image
+from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image, hardmini_test
 
 coco_file = ''
 hip_coco(coco_file, crop_size=1280, splits=2, scales=[16], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
@@ -69,16 +70,34 @@ hip_test(results, splits=2, score_thr=score_thr, match_mode='iou', min_pos_iou=0
 
 results = ''
 hip_test_image(results, splits=2)
+
+logs = ''
+hardmini_test(logs, level='image', score=0.85, nok=True)
+```
+
+## parameters
+```python
+cfg_xlr = 1.0
+cfg_times = 3
+cfg_classes = []
+cfg_num_classes = 20
+cfg_albu_p = 0.5
+cfg_project_name = 'ipynbname.name()'
+cfg_train_data_root = '/workspace/datasets/xxxx'
+cfg_train_coco_file = 'keep_p_samples/01/train.json'
+cfg_val_data_root = '/workspace/datasets/xxxx'
+cfg_val_coco_file = 'keep_p_samples/01/val.json'
+cfg_test_data_root = '/workspace/datasets/xxxx'
+cfg_test_coco_file = 'keep_p_samples/01/test.json'
 ```
 
 ## base
 ```python
 %cd /workspace/cvtk/references/mmdetection
 import os
-import ipynbname
 
 MMDET_PATH = '/usr/src/mmdetection'
-os.environ['MMDET_PATH'] = MMDET_PATH
+#os.environ['MMDET_PATH'] = MMDET_PATH
 #os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
 def clean_models(work_dir, n=2):
@@ -105,8 +124,8 @@ def clean_models(work_dir, n=2):
 ```python
 %%time
 albu_train_transforms = [
-    dict(type='GaussNoise', var_limit=[10, 30], p=0.5),
-    dict(type='RandomRotate90', p=0.5),
+    dict(type='GaussNoise', var_limit=[10, 30], p=cfg_albu_p),
+    dict(type='RandomRotate90', p=cfg_albu_p),
 ]
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -151,34 +170,26 @@ test_pipeline = [
         ]),
 ]
 
-xlr = 1.0
-times = 2
-classes = None
-num_classes = 20
-data_root = '/workspace/datasets/xxxx'
-coco_file = 'keep_p_samples/01/train.json'
-project = ipynbname.name()
-
 cfg_data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, coco_file),
-        classes=classes,
-        img_prefix=data_root,
+        ann_file=os.path.join(cfg_train_data_root, cfg_train_coco_file),
+        classes=cfg_classes,
+        img_prefix=cfg_train_data_root,
         pipeline=train_pipeline),
     val=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, coco_file),
-        classes=classes,
-        img_prefix=data_root,
+        ann_file=os.path.join(cfg_val_data_root, cfg_val_coco_file),
+        classes=cfg_classes,
+        img_prefix=cfg_val_data_root,
         pipeline=test_pipeline),
     test=dict(
         type='CocoDataset',
-        ann_file=os.path.join(data_root, coco_file),
-        classes=classes,
-        img_prefix=data_root,
+        ann_file=os.path.join(cfg_test_data_root, cfg_test_coco_file),
+        classes=cfg_classes,
+        img_prefix=cfg_test_data_root,
         pipeline=test_pipeline))
 
 cfg_model = dict(
@@ -197,16 +208,16 @@ cfg_model = dict(
     ),
     roi_head=dict(
         bbox_head=dict(
-            num_classes=num_classes,
+            num_classes=cfg_num_classes,
         ),
     ),
 )
 
 cfg_lr_config = dict(
     _delete_=True,
-    policy='Step',
-    step=[8 * times, 11 * times],
-    gamma=0.1,
+    policy='CosineAnnealing',
+    by_epoch=False,
+    min_lr_ratio=1e-4,
     warmup='linear',
     warmup_iters=1500,
     warmup_ratio=0.001,
@@ -220,8 +231,8 @@ cfg_log_config = dict(
 )
 
 cfg_options = dict(
-    optimizer=dict(type='SGD', lr=0.005 * xlr, momentum=0.9, weight_decay=0.0001),
-    runner=dict(type='EpochBasedRunner', max_epochs=12 * times),
+    optimizer=dict(type='SGD', lr=0.005 * cfg_xlr, momentum=0.9, weight_decay=0.0001),
+    runner=dict(type='EpochBasedRunner', max_epochs=12 * cfg_times),
     evaluation=dict(interval=2, metric='bbox'),
     checkpoint_config=dict(interval=1),
     log_config=cfg_log_config,
@@ -230,7 +241,7 @@ cfg_options = dict(
     data=cfg_data)
 os.environ['CFG_OPTIONS'] = str(cfg_options)
 
-WORK_DIR = '/workspace/notebooks/{}'.format(project)
+WORK_DIR = '/workspace/notebooks/{}'.format(cfg_project_name)
 CONFIG = os.path.join(MMDET_PATH, 'configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
 
 ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, WORK_DIR)
@@ -245,9 +256,9 @@ f'WORK_DIR: {WORK_DIR}'
 %%time
 import os
 
-times = 2
-data_root = '/workspace/datasets/xxxx'
-coco_file = 'keep_p_samples/01/train.json'
+times = cfg_times#2
+data_root = cfg_test_data_root#'/workspace/datasets/xxxx'
+coco_file = cfg_test_coco_file#'keep_p_samples/01/train.json'
 
 work_dir = WORK_DIR
 config = os.path.basename(CONFIG)
@@ -260,7 +271,7 @@ workers_per_gpu = 2
 
 ARG_TEST = f'{data_root} {coco_file} {gpus} {config_file} {checkpoint_file} {batch_size} {workers_per_gpu}'
 logs = !python dev/py_test.py {ARG_TEST}
-print(logs)
+print("\n".join(logs))
 
 from cvtk.utils.abc.discover import hardmini_test
 hardmini_test(logs, level='image', score=0.85, nok=True)
@@ -294,16 +305,16 @@ cfg_model = dict(
             finest_scale=56,
         ),
         bbox_head=dict(
-            num_classes=num_classes,
+            num_classes=cfg_num_classes,
         ),
     ),
 )
 
 cfg_lr_config = dict(
     _delete_=True,
-    policy='CosineAnnealing',
-    by_epoch=False,
-    min_lr_ratio=1e-5,
+    policy='Step',
+    step=[8 * cfg_times, 11 * cfg_times],
+    gamma=0.1,
     warmup='linear',
     warmup_iters=1500,
     warmup_ratio=0.001,
@@ -312,7 +323,7 @@ cfg_lr_config = dict(
 cfg_lr_config = dict(
     _delete_=True,
     policy='OneCycle',
-    max_lr=0.005 * xlr,
+    max_lr=0.005 * cfg_xlr,
     pct_start=0.3,
     anneal_strategy='cos',
     div_factor=25,

@@ -162,7 +162,7 @@ def hip_test_image(results, splits=0, silent=False):
 
 
 def hardmini_test(logs, level="image", score=0.85, nok=True):
-    pkl_list = [l.strip() for l in logs.split("\n") if ".pkl" in l]
+    pkl_list = [line.strip() for line in logs if ".pkl" in line]
     assert len(pkl_list) == 1, f"Input must be one and only one: {pkl_list}"
 
     pkl_file = pkl_list[0]
@@ -171,10 +171,15 @@ def hardmini_test(logs, level="image", score=0.85, nok=True):
         data = [d for d in data if d["p_score"] < score]
         if nok:
             data += [d for d in data if d["is_ok"] == "N"]
+    elif level == "object":
+        data = hip_test(pkl_file, splits=0, silent=True)
+        data = [d for d in data if d["score"] < score]
+        if nok:
+            data += [d for d in data if d["is_ok"] == "N"]
     else:
         data = [{"file_name": "none"}]
 
     f = pkl_file + ".csv"
     df = pd.DataFrame(data)
     df.to_csv(f, index=False)
-    return f
+    return f"{f}, {df.shape[0]}"
