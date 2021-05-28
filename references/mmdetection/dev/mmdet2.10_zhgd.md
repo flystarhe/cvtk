@@ -30,7 +30,7 @@ ann_dir=${img_dir}
 out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
-python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
+python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32 --all-imgs
 
 python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
 
@@ -44,7 +44,7 @@ options='{"include":"/workspace/notebooks/selected_csv"}'
 python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
 results=/workspace/notebooks/pkl_file
-mode=complex
+mode=complex, max_score or rank_mixed
 score_thr='{"*":0.3}'
 label_grade='{"*":1}'
 options='{"clean_mode":"dist","clean_param":1.0}'
@@ -86,7 +86,7 @@ cfg_experiment_path = './tmp/ipynbname'
 cfg_train_data_root = '/workspace/datasets/xxxx'
 cfg_train_coco_file = 'keep_p_samples/01/train.json'
 cfg_val_data_root = '/workspace/datasets/xxxx'
-cfg_val_coco_file = 'keep_p_samples/01/val.json'
+cfg_val_coco_file = 'keep_p_samples/01/test.json'
 cfg_test_data_root = '/workspace/datasets/xxxx'
 cfg_test_coco_file = 'keep_p_samples/01/test.json'
 ```
