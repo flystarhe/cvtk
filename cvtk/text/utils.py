@@ -2,7 +2,7 @@ import re
 
 
 def match(pattern, string):
-    # pattern like `r".*coco_file$"`
+    # `re.compile(r".*coco_file$")`
     if pattern.match(string):
         return True
     return False
