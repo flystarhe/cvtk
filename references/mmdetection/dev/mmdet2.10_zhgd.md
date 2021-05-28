@@ -34,7 +34,7 @@ python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32
 
 python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
 
-cp -u ${out_dir}/keep_p_samples/01/all.json ${out_dir}/coco_.json
+cp -u ${out_dir}/keep_p_samples/01/train.json ${out_dir}/coco_.json
 python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
 
 coco_dir=/workspace/datasets/xxxx
@@ -124,7 +124,6 @@ def clean_models(work_dir, n=2):
 ```python
 %%time
 albu_train_transforms = [
-    dict(type='GaussNoise', var_limit=[10, 30], p=cfg_albu_p),
     dict(type='RandomRotate90', p=cfg_albu_p),
 ]
 img_norm_cfg = dict(
@@ -149,7 +148,7 @@ train_pipeline = [
         update_pad_shape=False,
         skip_img_without_anno=True),
     dict(type='Resize', test_mode=True, multi_scale=[]),
-    dict(type='RandomCrop', height=800, width=800),
+    dict(type='RandomCrop', height=1280, width=1280),
     dict(type='RandomFlip', flip_ratio=0.5, direction=['horizontal', 'vertical', 'diagonal']),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
