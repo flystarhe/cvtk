@@ -25,7 +25,7 @@ docker update --restart=always ${n}
 ```sh
 %%bash
 
-img_dir=/workspace/datasets/xxxx
+img_dir=/workspace/notebooks/xxxx
 ann_dir=${img_dir}
 out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
@@ -37,7 +37,7 @@ python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
 cp -u ${out_dir}/keep_p_samples/01/train.json ${out_dir}/coco_.json
 python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
 
-coco_dir=/workspace/datasets/xxxx
+coco_dir=/workspace/notebooks/xxxx
 coco_file=keep_p_samples/01/train.json
 output_dir=${coco_dir}_VIZ
 options='{"include":"/workspace/notebooks/selected_csv"}'
@@ -83,17 +83,17 @@ cfg_classes = []
 cfg_num_classes = 20
 cfg_albu_p = 0.5
 cfg_experiment_path = './tmp/ipynbname'
-cfg_train_data_root = '/workspace/datasets/xxxx'
+cfg_train_data_root = '/workspace/notebooks/xxxx'
 cfg_train_coco_file = 'keep_p_samples/01/train.json'
-cfg_val_data_root = '/workspace/datasets/xxxx'
+cfg_val_data_root = '/workspace/notebooks/xxxx'
 cfg_val_coco_file = 'keep_p_samples/01/test.json'
-cfg_test_data_root = '/workspace/datasets/xxxx'
+cfg_test_data_root = '/workspace/notebooks/xxxx'
 cfg_test_coco_file = 'keep_p_samples/01/test.json'
 ```
 
 ## base
+执行命令`%cd /workspace/cvtk/references/mmdetection`设置工作目录。
 ```python
-%cd /workspace/cvtk/references/mmdetection
 import os
 
 MMDET_PATH = '/usr/src/mmdetection'
@@ -254,7 +254,7 @@ cfg_experiment_path
 import os
 
 times = cfg_times#2
-data_root = cfg_test_data_root#'/workspace/datasets/xxxx'
+data_root = cfg_test_data_root#'/workspace/notebooks/xxxx'
 coco_file = cfg_test_coco_file#'keep_p_samples/01/train.json'
 
 work_dir = cfg_experiment_path

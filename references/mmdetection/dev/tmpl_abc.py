@@ -5,7 +5,7 @@ from papermill import execute_notebook
 
 workdir = "/workspace/cvtk/references/mmdetection"
 outdir = Path("/workspace/notebooks/task_name")
-outdir.mkdir(parents=True, exist_ok=True)
+# !rm -rf {outdir} && mkdir -p {outdir}
 
 _cfg = dict(cfg_xlr=1.0,
             cfg_times=3,
@@ -13,11 +13,11 @@ _cfg = dict(cfg_xlr=1.0,
             cfg_num_classes=20,
             cfg_albu_p=0.5,
             cfg_experiment_path='./tmp/ipynbname',
-            cfg_train_data_root='/workspace/datasets/xxxx',
+            cfg_train_data_root='/workspace/notebooks/xxxx',
             cfg_train_coco_file='keep_p_samples/01/train.json',
-            cfg_val_data_root='/workspace/datasets/xxxx',
+            cfg_val_data_root='/workspace/notebooks/xxxx',
             cfg_val_coco_file='keep_p_samples/01/test.json',
-            cfg_test_data_root='/workspace/datasets/xxxx',
+            cfg_test_data_root='/workspace/notebooks/xxxx',
             cfg_test_coco_file='keep_p_samples/01/test.json')
 
 logs = []
