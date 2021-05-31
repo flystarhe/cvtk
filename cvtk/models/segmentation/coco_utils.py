@@ -21,7 +21,7 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
     x = np.clip(src_area, a_min, a_max)
     x = (x - a_min) / (a_max - a_min)
-    x = 1.0 - 0.5 * x + 1e-5
+    x = 1.0 - 0.5 * x - 1e-5
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
@@ -108,13 +108,13 @@ class ToyDataset:
                 x1 = max(0, np.random.randint(x2 - self._crop_size, x1))
             else:
                 x1 = max(0, (x1 + x2 - self._crop_size) // 2)
-            _shift = np.random.randint(0, 64) - 32
+            _shift = np.random.randint(0, 32) - 16
             x1 = x1 + _shift
             if y2 - y1 < self._crop_size:
                 y1 = max(0, np.random.randint(y2 - self._crop_size, y1))
             else:
                 y1 = max(0, (y1 + y2 - self._crop_size) // 2)
-            _shift = np.random.randint(0, 64) - 32
+            _shift = np.random.randint(0, 32) - 16
             y1 = y1 + _shift
             x2, y2 = x1 + self._crop_size, y1 + self._crop_size
 

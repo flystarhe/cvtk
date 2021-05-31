@@ -18,7 +18,7 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
     x = np.clip(src_area, a_min, a_max)
     x = (x - a_min) / (a_max - a_min)
-    x = 1.0 - 0.5 * x + 1e-5
+    x = 1.0 - 0.5 * x - 1e-5
 
     s1 = (dst_area >= nonignore)
     s2 = (dst_area >= src_area * x)
@@ -46,6 +46,7 @@ class RandomCrop(object):
     """
 
     def __init__(self, height, width, seed=1234, **kw):
+        self.base_pad = kw.get("base_pad", 16)  # >=2
         self.rng = np.random.default_rng(seed)
         area = height * width * 0.5
         self.nonignore = area
@@ -99,8 +100,8 @@ class RandomCrop(object):
         if bboxes.shape[0] == 0:
             x_min, y_min, x_max, y_max = 0, 0, img_w, img_h
 
-            x_pad = max(self.width - img_w, 64)
-            y_pad = max(self.height - img_h, 64)
+            x_pad = max(self.width - img_w, 0) // 2 + self.base_pad
+            y_pad = max(self.height - img_h, 0) // 2 + self.base_pad
             patch = self._get_patch(x_min, y_min, x_max, y_max, x_pad, y_pad)
 
             dst_img = self._crop_and_paste(img, patch)
@@ -123,9 +124,10 @@ class RandomCrop(object):
 
         index = self._index_selection(labels)
         x_min, y_min, x_max, y_max = map(int, bboxes[index])
+        box_w, box_h = (x_max - x_min), (y_max - y_min)
 
-        x_pad = max(self.width - (x_max - x_min), 64)
-        y_pad = max(self.height - (y_max - y_min), 64)
+        x_pad = max(self.width - box_w, 0) // 2 + self.base_pad
+        y_pad = max(self.height - box_h, 0) // 2 + self.base_pad
         patch = self._get_patch(x_min, y_min, x_max, y_max, x_pad, y_pad)
 
         dst_img = self._crop_and_paste(img, patch)
