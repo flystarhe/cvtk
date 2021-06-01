@@ -89,6 +89,7 @@ cfg_val_data_root = '/workspace/notebooks/xxxx'
 cfg_val_coco_file = 'keep_p_samples/01/test.json'
 cfg_test_data_root = '/workspace/notebooks/xxxx'
 cfg_test_coco_file = 'keep_p_samples/01/test.json'
+cfg_tmpl_path = '/usr/src/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
 ```
 
 ## base
@@ -96,7 +97,7 @@ cfg_test_coco_file = 'keep_p_samples/01/test.json'
 ```python
 import os
 
-MMDET_PATH = '/usr/src/mmdetection'
+#MMDET_PATH = '/usr/src/mmdetection'
 #os.environ['MMDET_PATH'] = MMDET_PATH
 #os.environ['MKL_THREADING_LAYER'] = 'GNU'
 
@@ -240,8 +241,7 @@ cfg_options = dict(
     data=cfg_data)
 os.environ['CFG_OPTIONS'] = str(cfg_options)
 
-CONFIG = os.path.join(MMDET_PATH, 'configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
-ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(CONFIG, cfg_experiment_path)
+ARG_TRAIN = '{} --work-dir {} --launcher pytorch'.format(cfg_tmpl_path, cfg_experiment_path)
 !python -m torch.distributed.launch --nproc_per_node=2 dev/py_train.py {ARG_TRAIN}
 DEL_FILES = ' '.join(clean_models(cfg_experiment_path, 2))
 logs = !rm -rfv {DEL_FILES}
@@ -258,7 +258,7 @@ data_root = cfg_test_data_root#'/workspace/notebooks/xxxx'
 coco_file = cfg_test_coco_file#'keep_p_samples/01/train.json'
 
 work_dir = cfg_experiment_path
-config = os.path.basename(CONFIG)
+config = os.path.basename(cfg_tmpl_path)
 
 gpus = 2
 config_file = os.path.join(work_dir, config)

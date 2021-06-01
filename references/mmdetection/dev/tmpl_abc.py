@@ -15,7 +15,8 @@ _cfg = dict(cfg_xlr=1.0,
             cfg_val_data_root='/workspace/notebooks/xxxx',
             cfg_val_coco_file='keep_p_samples/01/test.json',
             cfg_test_data_root='/workspace/notebooks/xxxx',
-            cfg_test_coco_file='keep_p_samples/01/test.json')
+            cfg_test_coco_file='keep_p_samples/01/test.json',
+            cfg_tmpl_path='/usr/src/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py')
 outdir = Path(_cfg['cfg_train_data_root'] + '_T0601a')
 # !rm -rf {outdir} && mkdir -p {outdir}
 
