@@ -5,6 +5,7 @@ from pathlib import Path
 import cv2 as cv
 import pandas as pd
 from cvtk.io import increment_path, load_json, load_pkl
+from cvtk.io.csv import loads as load_csv_files
 from cvtk.utils.abc.nms import clean_by_bbox
 
 
@@ -50,9 +51,8 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
 
     include_stems = None
     if include is not None:
-        include_stems = pd.read_csv(include)["file_name"].tolist()
-        include_stems = set([Path(file_name).stem
-                             for file_name in include_stems])
+        tmp = load_csv_files(include)["file_name"].tolist()
+        include_stems = set([Path(file_name).stem for file_name in tmp])
 
     id2name = {c["id"]: c["name"] for c in coco["categories"]}
 
@@ -94,9 +94,8 @@ def display_test(results, score_thr, output_dir, **kw):
 
     include_stems = None
     if include is not None:
-        include_stems = pd.read_csv(include)["file_name"].tolist()
-        include_stems = set([Path(file_name).stem
-                             for file_name in include_stems])
+        tmp = load_csv_files(include)["file_name"].tolist()
+        include_stems = set([Path(file_name).stem for file_name in tmp])
 
     for file_name, target, predict, dts, gts in results:
         file_name = Path(file_name)
