@@ -183,7 +183,9 @@ def hardmini_test(logs, level="image", score=0.85, nok=True):
     else:
         data = [{"file_name": "none"}]
 
-    f = pkl_file + ".csv"
+    flag = f"_{level}_{score:.2f}.csv"
+
+    f = pkl_file + flag
     df = pd.DataFrame(data)
     df.to_csv(f, index=False)
     return f"{f}, {df.shape[0]}"
