@@ -60,7 +60,7 @@ def _collate_fn(nodes, lines, dts):
     for i_set in clustering(nodes, lines):
         vals = [dts[i] for i in i_set]
         best = max(vals, key=lambda x: x["score"])
-        bboxes = np.array([d["xyxy"] for d in vals], dtype=np.float32)
+        bboxes = np.array([dt["xyxy"] for dt in vals], dtype=np.float32)
         x1, y1 = bboxes[:, :2].min(axis=0).tolist()
         x2, y2 = bboxes[:, 2:].max(axis=0).tolist()
         best["bbox"] = [x1, y1, x2 - x1, y2 - y1]
@@ -96,6 +96,17 @@ def _clean_with_dist(dts, k=1.0):
     return _collate_fn(nodes, lines, dts)
 
 
+def _clean_with_one(dts):
+    best = max(dts, key=lambda x: x["score"])
+    bboxes = np.array([dt["xyxy"] for dt in dts], dtype=np.float32)
+    x1, y1 = bboxes[:, :2].min(axis=0).tolist()
+    x2, y2 = bboxes[:, 2:].max(axis=0).tolist()
+    best["bbox"] = [x1, y1, x2 - x1, y2 - y1]
+    best["area"] = (x2 - x1) * (y2 - y1)
+    best["xyxy"] = [x1, y1, x2, y2]
+    return [best]
+
+
 def clean_by_bbox(dts, mode="dist", param=1.0):
     if len(dts) == 0:
         return dts
@@ -109,7 +120,9 @@ def clean_by_bbox(dts, mode="dist", param=1.0):
 
     dts_ = []
     for v in groups.values():
-        if mode == "dist":
+        if mode == "one":
+            dts_.extend(_clean_with_one(v))
+        elif mode == "dist":
             dts_.extend(_clean_with_dist(v, param))
         else:
             dts_.extend(_clean_with_ious(v, mode, param))

@@ -53,7 +53,7 @@ python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${opti
 results=/workspace/notebooks/pkl_file
 score_thr='{"*":0.3}'
 output_dir=${results%.*}_VIZ
-options='{"include":"/workspace/notebooks/selected_csv"}'
+options='{"include":"/workspace/notebooks/selected_csv","clean_mode":"one","clean_param":None}'
 python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 

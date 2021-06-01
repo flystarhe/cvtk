@@ -30,7 +30,7 @@ def gen_code_by_complex(dts, **kw):
     rank3 = np.array([dt["score"]
                       for dt in dts], dtype=np.float32)
 
-    return dts[np.argmax(rank1 * 100 + rank2 + rank3)]
+    return dts[np.argmax(rank1 * 100 + rank2 * 10 + rank3)]
 
 
 def gen_code_by_max_score(dts, **kw):
