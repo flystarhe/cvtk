@@ -40,7 +40,7 @@ python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
 coco_dir=/workspace/notebooks/xxxx
 coco_file=keep_p_samples/01/train.json
 output_dir=${coco_dir}_VIZ
-options='{"include":"/workspace/notebooks/selected_csv"}'
+options='{"filters":"[-]/workspace/notebooks/selected_csv,"}'
 python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
 results=/workspace/notebooks/pkl_file
@@ -53,7 +53,7 @@ python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${opti
 results=/workspace/notebooks/pkl_file
 score_thr='{"*":0.3}'
 output_dir=${results%.*}_VIZ
-options='{"include":"/workspace/notebooks/selected_csv","clean_mode":"one","clean_param":None}'
+options='{"filters":"[-]/workspace/notebooks/selected_csv,","clean_mode":"one","clean_param":None}'
 python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 

@@ -5,8 +5,27 @@ from pathlib import Path
 import cv2 as cv
 import pandas as pd
 from cvtk.io import increment_path, load_json, load_pkl
-from cvtk.io.csv import loads as load_csv_files
 from cvtk.utils.abc.nms import clean_by_bbox
+
+
+def load_csv_files(csv_files):
+    set_out, set_in = set(), set()
+
+    if csv_files is None:
+        return set_out, set_in
+
+    for f in csv_files.split(","):
+        if ".csv" not in f:
+            continue
+
+        if f[0] == "-":
+            dat = pd.read_csv(f[1:])["file_name"].tolist()
+            set_out.update([Path(file_name).stem for file_name in dat])
+        else:
+            dat = pd.read_csv(f)["file_name"].tolist()
+            set_in.update([Path(file_name).stem for file_name in dat])
+
+    return set_out, set_in
 
 
 def get_val(data, key, val=None):
@@ -41,7 +60,7 @@ def draw_bbox(img, anns, offset=0, color_val=(0, 0, 255)):
 
 
 def display_coco(coco_dir, coco_file, output_dir, **kw):
-    include = kw.get("include", None)
+    filters = kw.get("filters", None)
 
     coco_dir = Path(coco_dir)
     coco = load_json(coco_dir / coco_file)
@@ -49,10 +68,7 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
     output_dir = Path(output_dir)
     shutil.rmtree(output_dir, ignore_errors=True)
 
-    include_stems = None
-    if include is not None:
-        tmp = load_csv_files(include)["file_name"].tolist()
-        include_stems = set([Path(file_name).stem for file_name in tmp])
+    set_out, set_in = load_csv_files(filters)
 
     id2name = {c["id"]: c["name"] for c in coco["categories"]}
 
@@ -68,7 +84,9 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
 
         file_name = coco_dir / file_name
 
-        if include_stems is not None and file_name.stem not in include_stems:
+        if set_out and file_name.stem in set_out:
+            continue
+        if set_in and file_name.stem not in set_in:
             continue
 
         img = cv.imread(str(file_name), 1)
@@ -83,7 +101,7 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
 
 
 def display_test(results, score_thr, output_dir, **kw):
-    include = kw.get("include", None)
+    filters = kw.get("filters", None)
     clean_mode = kw.get("clean_mode", None)
     clean_param = kw.get("clean_param", None)
     output_dir = increment_path(output_dir, exist_ok=False)
@@ -92,15 +110,14 @@ def display_test(results, score_thr, output_dir, **kw):
         shutil.copy(results, output_dir)
         results = load_pkl(results)
 
-    include_stems = None
-    if include is not None:
-        tmp = load_csv_files(include)["file_name"].tolist()
-        include_stems = set([Path(file_name).stem for file_name in tmp])
+    set_out, set_in = load_csv_files(filters)
 
     for file_name, target, predict, dts, gts in results:
         file_name = Path(file_name)
 
-        if include_stems is not None and file_name.stem not in include_stems:
+        if set_out and file_name.stem in set_out:
+            continue
+        if set_in and file_name.stem not in set_in:
             continue
 
         dts = [d for d in dts
