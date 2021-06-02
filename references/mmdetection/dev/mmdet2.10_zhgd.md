@@ -30,31 +30,31 @@ ann_dir=${img_dir}
 out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
-python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32 --all-imgs
+time python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32 --all-imgs
 
-python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
+time python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
 
 cp -u ${out_dir}/keep_p_samples/01/train.json ${out_dir}/coco_.json
-python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
+time python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
 
 coco_dir=/workspace/notebooks/xxxx
 coco_file=keep_p_samples/01/train.json
 output_dir=${coco_dir}_VIZ
 options='{"filters":"[-]/workspace/notebooks/selected_csv,"}'
-python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
+time python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
 results=/workspace/notebooks/pkl_file
 mode=complex, max_score or rank_mixed
 score_thr='{"*":0.3}'
 label_grade='{"*":1}'
 options='{"clean_mode":"dist","clean_param":1.0}'
-python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${options}
+time python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${options}
 
 results=/workspace/notebooks/pkl_file
 score_thr='{"*":0.3}'
 output_dir=${results%.*}_VIZ
 options='{"filters":"[-]/workspace/notebooks/selected_csv,","clean_mode":"one","clean_param":None}'
-python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
+time python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 
 **cvtk.utils.abc.discover:**
