@@ -271,7 +271,7 @@ logs = !python dev/py_test.py {ARG_TEST}
 print('\n'.join(logs))
 
 from cvtk.utils.abc.discover import hardmini_test
-[hardmini_test(logs, level='image', score=s, nok=True) for s in (0.3, 0.5, 0.85)]
+[hardmini_test(logs, level='image', score=s, nok=True) for s in (0.3, 0.5, 0.85, 1.01)]
 ```
 
 ## notes
