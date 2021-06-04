@@ -23,7 +23,7 @@ def run(workdir, outdir, cfg, input_path_list, times_list, lr_list, gids):
     logs = []
     for input_path, times, lr, i in args:
         _cfg, input_path = copy.deepcopy(cfg), Path(input_path)
-        fname = f"{input_path.stem}_{times=:02d}_{lr=:.1f}_{i=:02d}.ipynb"
+        fname = f"{input_path.stem}_{times=:02d}_{lr=:g}_{i=:02d}.ipynb"
 
         _out = (outdir / fname[:-6]).as_posix()
         _cfg = replace2(r".*coco_file$", _cfg, "/01/", f"/{i:02d}/")
