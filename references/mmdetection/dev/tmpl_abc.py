@@ -8,6 +8,7 @@ cfg = dict(
     cfg_albu_p=0.5,
     cfg_num_gpus=2,
     cfg_mini_batch=2,
+    cfg_multi_scale=[],
     cfg_crop_size=1280,
     cfg_load_from=None,
     cfg_experiment_path='./tmp/ipynbname',

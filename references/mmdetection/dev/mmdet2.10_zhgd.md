@@ -84,6 +84,7 @@ cfg_num_classes = 20
 cfg_albu_p = 0.5
 cfg_num_gpus = 2
 cfg_mini_batch = 2
+cfg_multi_scale = []
 cfg_crop_size = 1280
 cfg_load_from = None
 cfg_experiment_path = './tmp/ipynbname'
@@ -137,7 +138,7 @@ train_pipeline = [
         },
         update_pad_shape=False,
         skip_img_without_anno=True),
-    dict(type='Resize', test_mode=True, multi_scale=[]),
+    dict(type='Resize', test_mode=(len(cfg_multi_scale) == 0), multi_scale=cfg_multi_scale),
     dict(type='RandomCrop', height=cfg_crop_size, width=cfg_crop_size),
     dict(type='RandomFlip', flip_ratio=0.5, direction=['horizontal', 'vertical', 'diagonal']),
     dict(type='Normalize', **img_norm_cfg),
@@ -151,7 +152,7 @@ test_pipeline = [
         type='MultiScaleFlipAug',
         scale_factor=1.0,
         transforms=[
-            dict(type='Resize', test_mode=True, multi_scale=[]),
+            dict(type='Resize', test_mode=True, multi_scale=cfg_multi_scale),
             dict(type='Normalize', **img_norm_cfg),
             dict(type='Pad', size_divisor=32),
             dict(type='DefaultFormatBundle'),
@@ -243,13 +244,11 @@ cfg_experiment_path
 %%time
 import os
 
-times = cfg_times#2
-data_root = cfg_test_data_root#'/workspace/notebooks/xxxx'
-coco_file = cfg_test_coco_file#'keep_p_samples/01/train.json'
-
 work_dir = cfg_experiment_path
 config = os.path.basename(cfg_tmpl_path)
 
+data_root = cfg_test_data_root#'/workspace/notebooks/xxxx'
+coco_file = cfg_test_coco_file#'keep_p_samples/01/train.json'
 gpus = cfg_num_gpus
 config_file = os.path.join(work_dir, config)
 checkpoint_file = os.path.join(work_dir, 'latest.pth')
