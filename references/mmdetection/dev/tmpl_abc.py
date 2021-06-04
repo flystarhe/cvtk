@@ -26,10 +26,10 @@ outdir = cfg['cfg_train_data_root'] + '_T0000'
 
 input_path_list = ['test.ipynb']
 times_list = [2, 4, 6]
+gid_list = [1, 2, 3]
 lr_list = [0.02/4]
-gids = [1]
 res1 = notebook.run(workdir, outdir, cfg, input_path_list,
-                    times_list, lr_list, gids)
+                    times_list, gid_list, lr_list)
 
 nbs = ' '.join([log['metadata']['papermill']['output_path'] for log in res1])
 # !jupyter nbconvert --to html {nbs}

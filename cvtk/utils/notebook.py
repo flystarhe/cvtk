@@ -12,21 +12,21 @@ def ext_args(args, params):
     return [a + [b] for a in args for b in params]
 
 
-def run(workdir, outdir, cfg, input_path_list, times_list, lr_list, gids):
+def run(workdir, outdir, cfg, input_path_list, times_list, gid_list, lr_list):
     args = ext_args(None, input_path_list)
     args = ext_args(args, times_list)
+    args = ext_args(args, gid_list)
     args = ext_args(args, lr_list)
-    args = ext_args(args, gids)
 
     outdir = Path(outdir)
 
     logs = []
-    for input_path, times, lr, i in args:
+    for input_path, times, gid, lr in args:
         _cfg, input_path = copy.deepcopy(cfg), Path(input_path)
-        fname = f"{input_path.stem}_{times=:02d}_{lr=:g}_{i=:02d}.ipynb"
+        fname = f"{input_path.stem}_{times=:02d}_{gid=:02d}_{lr=:g}.ipynb"
 
         _out = (outdir / fname[:-6]).as_posix()
-        _cfg = replace2(r".*coco_file$", _cfg, "/01/", f"/{i:02d}/")
+        _cfg = replace2(r".*coco_file$", _cfg, "/01/", f"/{gid:02d}/")
         _cfg.update(cfg_experiment_path=_out, cfg_times=times, cfg_lr=lr)
 
         log = execute_notebook(input_path, outdir / fname, parameters=_cfg,
