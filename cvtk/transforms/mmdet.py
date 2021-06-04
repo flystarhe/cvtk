@@ -92,6 +92,9 @@ class RandomCrop(object):
         return bboxes
 
     def __call__(self, results):
+        if self.height == 0 or self.width == 0:
+            return results
+
         img, bboxes, labels = [results[k]
                                for k in ("img", "gt_bboxes", "gt_labels")]
         img_h, img_w, img_c = img.shape
