@@ -25,11 +25,11 @@ def ext_args(args, params):
     return [a + [b] for a in args for b in params]
 
 
-def run(carry_on, workdir, outdir, cfg, input_path_list, times_list, gid_list, lr_list):
+def run(carry_on, workdir, outdir, cfg, input_path_list, times_list, lr_list, gids):
     args = ext_args(None, input_path_list)
     args = ext_args(args, times_list)
-    args = ext_args(args, gid_list)
     args = ext_args(args, lr_list)
+    args = ext_args(args, gids)
 
     outdir = Path(outdir)
 
@@ -37,15 +37,15 @@ def run(carry_on, workdir, outdir, cfg, input_path_list, times_list, gid_list, l
     _cached = {}
     for vals in args:
         _cfg = copy.deepcopy(cfg)
-        input_path, times, gid, lr = vals
-        fname = f"{Path(input_path).stem}_{times=:02d}_{gid=:d}_{lr=:g}.ipynb"
+        input_path, times, lr, i = vals
+        fname = f"{Path(input_path).stem}_{times=:02d}_{lr=:g}_{i=:d}.ipynb"
 
         _out = (outdir / fname[:-6]).as_posix()
         if carry_on is not None:
             key = _gen_key(vals, carry_on)
             _cfg["cfg_load_from"] = _cached.get(key)
             _cached[key] = os.path.join(_out, "latest.pth")
-        _cfg = replace2(r".*coco_file$", _cfg, "/01/", f"/{gid:02d}/")
+        _cfg = replace2(r".*coco_file$", _cfg, "/01/", f"/{i:02d}/")
         _cfg.update(cfg_experiment_path=_out, cfg_times=times, cfg_lr=lr)
 
         log = execute_notebook(input_path, outdir / fname, parameters=_cfg,
