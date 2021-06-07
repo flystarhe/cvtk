@@ -62,7 +62,7 @@ time python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 from cvtk.utils.abc.discover import hip_coco, hip_test, hip_test_image, hardmini_test
 
 coco_file = ''
-hip_coco(coco_file, crop_size=1280, splits=2, scales=[16], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
+hip_coco(coco_file, crop_size=1280, splits=2, scales=[8], base_sizes=[4, 8, 16, 32, 64], ratios=[0.5, 1.0, 2.0])
 
 results = ''
 score_thr = {'*': 0.3}
@@ -191,7 +191,7 @@ cfg_model = dict(
     ),
     rpn_head=dict(
         anchor_generator=dict(
-            scales=[16],
+            scales=[8],
             ratios=[0.5, 1.0, 2.0],
             strides=[4, 8, 16, 32, 64],
         ),
