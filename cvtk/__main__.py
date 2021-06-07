@@ -27,8 +27,8 @@ def args_coco_build(args=None):
                         help="filter dataset with hiplot(*.csv), coco(*.json) or dir(path/)")
     parser.add_argument("-m", "--mapping", type=str, default=None,
                         help="python dict, be run `eval(mapping)`")
-    parser.add_argument("-e", "--pad_size", type=int, default=0,
-                        help="padding bbox on width/height")
+    parser.add_argument("-e", "--min_size", type=int, default=0,
+                        help="padding mini bbox to min size")
     parser.add_argument("--all-imgs", action="store_true",
                         help="keep none-shapes image")
     args = parser.parse_args(args=args)

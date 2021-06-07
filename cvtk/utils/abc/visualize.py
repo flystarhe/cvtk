@@ -60,7 +60,9 @@ def draw_bbox(img, anns, offset=0, color_val=(0, 0, 255)):
 
 
 def display_coco(coco_dir, coco_file, output_dir, **kw):
+    level = kw.get("level", 1)
     filters = kw.get("filters", None)
+    group_by = kw.get("group_by", None)
 
     coco_dir = Path(coco_dir)
     coco = load_json(coco_dir / coco_file)
@@ -83,6 +85,7 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
         file_name = img["file_name"]
 
         file_name = coco_dir / file_name
+        target = Path(file_name).parent.name
 
         if set_out and file_name.stem in set_out:
             continue
@@ -91,17 +94,25 @@ def display_coco(coco_dir, coco_file, output_dir, **kw):
 
         img = cv.imread(str(file_name), 1)
 
-        text = "target {}".format(file_name.parts[:-1][-3:])
+        text = "{} {}".format(target, file_name.parts[:-1][-level:])
         cv.putText(img, text, (20, 40),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
         img = draw_bbox(img, gts, offset=10, color_val=(0, 255, 0))
-        cv.imwrite(str(output_dir / file_name.name), img)
+
+        dst_dir = output_dir / "images"
+        if group_by == "target":
+            dst_dir = output_dir / str(target)
+
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        cv.imwrite(str(dst_dir / file_name.name), img)
     return str(output_dir)
 
 
 def display_test(results, score_thr, output_dir, **kw):
+    level = kw.get("level", 1)
     filters = kw.get("filters", None)
+    group_by = kw.get("group_by", None)
     clean_mode = kw.get("clean_mode", None)
     clean_param = kw.get("clean_param", None)
     output_dir = increment_path(output_dir, exist_ok=False)
@@ -127,7 +138,7 @@ def display_test(results, score_thr, output_dir, **kw):
 
         img = cv.imread(str(file_name), 1)
 
-        text = "{} {}".format(target, file_name.parts[:-1][-3:])
+        text = "{} {}".format(target, file_name.parts[:-1][-level:])
         cv.putText(img, text, (20, 40),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
@@ -144,5 +155,13 @@ def display_test(results, score_thr, output_dir, **kw):
 
         img = draw_bbox(img, dts, offset=10, color_val=(0, 0, 255))
         img = draw_bbox(img, gts, offset=50, color_val=(0, 255, 0))
-        cv.imwrite(str(output_dir / file_name.name), img)
+
+        dst_dir = output_dir / "images"
+        if group_by == "target":
+            dst_dir = output_dir / str(target)
+        elif group_by == "predict":
+            dst_dir = output_dir / predict["label"]
+
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        cv.imwrite(str(dst_dir / file_name.name), img)
     return str(output_dir)

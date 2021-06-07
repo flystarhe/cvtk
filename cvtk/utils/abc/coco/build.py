@@ -125,7 +125,7 @@ def copyfile(nparr, out_dir, out_path, del_shapes):
     return str(cur_file.relative_to(out_dir))
 
 
-def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None, pad_size=0, all_imgs=True):
+def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None, min_size=0, all_imgs=True):
     imdb, label_files = make_imdb(img_dir, ann_dir, include)
 
     if out_dir is not None:
@@ -200,11 +200,15 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
             else:
                 raise NotImplementedError(f"Not Implemented: {shape_type}")
 
-            if pad_size > 0:
-                x_min -= pad_size
-                y_min -= pad_size
-                w += pad_size * 2
-                h += pad_size * 2
+            x_pad = (min_size - w + 1) // 2
+            if x_pad > 0:
+                x_min = x_min - x_pad
+                w = w + x_pad * 2
+
+            y_pad = (min_size - h + 1) // 2
+            if y_pad > 0:
+                y_min = y_min - y_pad
+                h = h + y_pad * 2
 
             bbox = _norm([x_min, y_min, w, h], img_w, img_h)
 

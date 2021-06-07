@@ -40,20 +40,20 @@ time python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
 coco_dir=/workspace/notebooks/xxxx
 coco_file=keep_p_samples/01/train.json
 output_dir=${coco_dir}_VIZ
-options='{"filters":"[-]/workspace/notebooks/selected_csv,"}'
+options='{"level":1,"filters":"[-]/workspace/notebooks/selected_csv,","group_by":"target"}'
 time python -m cvtk viz-coco ${coco_dir} ${coco_file} ${output_dir} -o ${options}
 
 results=/workspace/notebooks/pkl_file
 mode=complex, max_score or rank_mixed
 score_thr='{"*":0.3}'
 label_grade='{"*":1}'
-options='{"clean_mode":"dist","clean_param":1.0}'
+options='{"clean_mode":None,"clean_param":None}'
 time python -m cvtk gen-test ${results} ${mode} ${score_thr} ${label_grade} -o ${options}
 
 results=/workspace/notebooks/pkl_file
 score_thr='{"*":0.3}'
 output_dir=${results%.*}_VIZ
-options='{"filters":"[-]/workspace/notebooks/selected_csv,","clean_mode":"one","clean_param":None}'
+options='{"level":1,"filters":"[-]/workspace/notebooks/selected_csv,","group_by":"predict","clean_mode":None,"clean_param":None}'
 time python -m cvtk viz-test ${results} ${score_thr} ${output_dir} -o ${options}
 ```
 
