@@ -135,6 +135,7 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
         out_dir = img_dir.name + "_coco"
         out_dir = img_dir.parent / out_dir
     shutil.rmtree(out_dir, ignore_errors=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     labels = set()
     for ann_data, _,  _ in imdb:
@@ -146,12 +147,6 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     labels = sorted(labels - DEL_LABELS)
     print(f"\nlabels: {len(labels)}\n{labels}\n")
     cat_index = {l: i for i, l in enumerate(labels)}
-
-    bak_dir = out_dir / "labels"
-    bak_dir.mkdir(parents=True, exist_ok=True)
-
-    for label_file in label_files:
-        shutil.copy(label_file, bak_dir)
 
     imgs, anns = [], []
     img_id, ann_id = 0, 0
@@ -230,6 +225,13 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
                    height=img_h,
                    file_name=copyfile(nparr, out_dir, out_path, del_shapes))
         imgs.append(img)
+
+    bak_dir = out_dir / "labels"
+    bak_dir.mkdir(parents=True, exist_ok=True)
+    dat = set([Path(img["file_name"]).stem for img in imgs])
+    for label_file in label_files:
+        if Path(label_file).stem in dat:
+            shutil.copy(label_file, bak_dir)
 
     cats = [dict(id=i, name=name, supercategory="")
             for i, name in enumerate(labels)]
