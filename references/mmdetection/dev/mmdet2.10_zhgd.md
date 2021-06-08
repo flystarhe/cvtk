@@ -188,6 +188,9 @@ cfg_model = dict(
     backbone=dict(
         type='ResNet',
         depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
     ),
     rpn_head=dict(
         anchor_generator=dict(
@@ -271,6 +274,9 @@ cfg_model = dict(
     backbone=dict(
         type='ResNet',
         depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
     ),
     neck=dict(
         num_outs=5,
