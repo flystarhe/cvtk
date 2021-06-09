@@ -38,7 +38,7 @@ def split_folder(indir, outdir, ref_file, col_path, col_label, suffixes=".jpg", 
             raise Exception(f"{ref_file} not supported")
 
         mapping = {Path(row[col_path]).name: row[col_label]
-                   for _, row in df.itertuples()}
+                   for _, row in df.iterrows()}
         dst_list = [_save_to(f, indir, outdir / mapping[f.name])
                     for f in src_list]
     else:
