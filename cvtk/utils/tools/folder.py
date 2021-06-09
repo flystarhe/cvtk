@@ -11,7 +11,7 @@ def _save_to(f, indir, outdir, level=None):
     return outdir / Path(*f.parts[-level:])
 
 
-def split_folder(indir, outdir, ref_file, col_path, col_label, suffixes=".jpg", level=1):
+def split_folder(indir, outdir, ref_file, col_path, col_label, suffixes=".jpg", level=None):
     indir = Path(indir)
 
     if outdir is None:
@@ -40,9 +40,10 @@ def split_folder(indir, outdir, ref_file, col_path, col_label, suffixes=".jpg", 
         mapping = {Path(row[col_path]).name: row[col_label]
                    for _, row in df.iterrows()}
         dst_list = [_save_to(f, indir, outdir / mapping[f.name])
-                    for f in src_list]
+                    for f in src_list if f.name in mapping]
     else:
-        dst_list = [_save_to(f, indir, outdir, level=level) for f in src_list]
+        dst_list = [_save_to(f, indir, outdir, level=level)
+                    for f in src_list]
 
     for f in sorted(set([f.parent for f in dst_list])):
         f.mkdir(parents=True, exist_ok=True)
