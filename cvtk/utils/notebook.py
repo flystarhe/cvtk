@@ -45,6 +45,8 @@ def run(carry_on, workdir, outdir, cfg, input_path_list, times_list, lr_list, gi
             key = _gen_key(vals, carry_on)
             _cfg["cfg_load_from"] = _cached.get(key)
             _cached[key] = os.path.join(_out, "latest.pth")
+            if key != "latest":
+                _cached["latest"] = _cached[key]
         _cfg = replace2(r".*coco_file$", _cfg, "/01/", f"/{i:02d}/")
         _cfg.update(cfg_experiment_path=_out, cfg_times=times, cfg_lr=lr)
 
@@ -52,7 +54,7 @@ def run(carry_on, workdir, outdir, cfg, input_path_list, times_list, lr_list, gi
                                cwd=workdir, progress_bar=False,
                                kernel_name="python")
         logs.append(log)
-    return logs
+    return logs, _cached
 
 
 def clean_models(workdir, n=3):

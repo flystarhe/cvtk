@@ -11,6 +11,7 @@ cfg = dict(
     cfg_multi_scale=[],
     cfg_crop_size=1280,
     cfg_load_from=None,
+    cfg_frozen_stages=1,
     cfg_experiment_path='./tmp/ipynbname',
     cfg_train_data_root='/workspace/notebooks/xxxx',
     cfg_train_coco_file='keep_p_samples/01/train.json',
@@ -29,8 +30,9 @@ input_path_list = ['test.ipynb']
 times_list = [2, 4, 6]
 lr_list = [0.02/4]
 gids = [1]
-res1 = notebook.run(carry_on, workdir, outdir, cfg, input_path_list,
-                    times_list, lr_list, gids)
+res1, cache1 = notebook.run(carry_on, workdir, outdir, cfg, input_path_list,
+                            times_list, lr_list, gids)
+print(cache1)
 
 nbs = ' '.join([log['metadata']['papermill']['output_path'] for log in res1])
 # !jupyter nbconvert --to html {nbs}

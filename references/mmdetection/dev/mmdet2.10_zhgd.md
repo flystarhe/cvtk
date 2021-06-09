@@ -87,6 +87,7 @@ cfg_mini_batch = 2
 cfg_multi_scale = []
 cfg_crop_size = 1280
 cfg_load_from = None
+cfg_frozen_stages = 1
 cfg_experiment_path = './tmp/ipynbname'
 cfg_train_data_root = '/workspace/notebooks/xxxx'
 cfg_train_coco_file = 'keep_p_samples/01/train.json'
@@ -190,7 +191,7 @@ cfg_model = dict(
         depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
+        frozen_stages=cfg_frozen_stages,
     ),
     rpn_head=dict(
         anchor_generator=dict(
@@ -276,7 +277,7 @@ cfg_model = dict(
         depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
+        frozen_stages=cfg_frozen_stages,
     ),
     neck=dict(
         num_outs=5,
