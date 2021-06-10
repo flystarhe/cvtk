@@ -227,7 +227,7 @@ cfg_log_config = dict(
 cfg_options = dict(
     optimizer=dict(type='SGD', lr=cfg_lr, momentum=0.9, weight_decay=0.0001),
     runner=dict(type='EpochBasedRunner', max_epochs=12 * cfg_times),
-    evaluation=dict(interval=2, metric='bbox'),
+    evaluation=dict(interval=6, metric='bbox'),
     checkpoint_config=dict(interval=1),
     log_config=cfg_log_config,
     lr_config=cfg_lr_config,

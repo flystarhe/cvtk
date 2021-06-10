@@ -21,18 +21,18 @@ cfg = dict(
     cfg_test_coco_file='keep_p_samples/01/test.json',
     cfg_tmpl_path='/usr/src/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py',
 )
+
 workdir = '/workspace/cvtk/references/mmdetection'
 outdir = cfg['cfg_train_data_root'] + '_T0000'
-# !rm -rf {outdir} && mkdir -p {outdir}
+# !rm -rf {outdir}
 
-carry_on = None  # 'latest', 0, [0, 2]
-input_path_list = ['test.ipynb']
-times_list = [2, 4, 6]
-lr_list = [0.02/4]
-gids = [1]
-res1, cache1 = notebook.run(carry_on, workdir, outdir, cfg, input_path_list,
-                            times_list, lr_list, gids)
-print(cache1)
+task_list = [
+    dict(cfg_times=2, cfg_lr=0.02/16*4, group_id=1, input_path=''),
+    dict(cfg_times=1, cfg_lr=0.02/16*4/25, group_id=1, input_path=''),
+]
+carry_on = None  # None, 'latest', ['key-name']
+res1, cached1 = notebook.run(task_list, carry_on, workdir, outdir, cfg)
+print(cached1)
 
 nbs = ' '.join([log['metadata']['papermill']['output_path'] for log in res1])
 # !jupyter nbconvert --to html {nbs}
