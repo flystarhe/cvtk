@@ -73,7 +73,7 @@ class KeepPSamplesIn(object):
         c = 1000
         if ranks:
             c = min(ranks, key=lambda x: x[1] + x[0] / 1000)[0]
-        return f"{c:04d}"
+        return c
 
     def _split(self, groups, seed):
         test_index, train_index = [], []
