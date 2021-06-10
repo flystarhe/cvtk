@@ -13,12 +13,13 @@ def save_dataset(coco, out_file, image_ids=None):
 
     if image_ids is not None:
         image_ids = set(image_ids)
-        coco["images"] = [img for img in coco["images"] if img["id"] in image_ids]
-        coco["annotations"] = [a for a in coco["annotations"]
-                               if a["image_id"] in image_ids]
+        coco["images"] = [img for img in coco["images"]
+                          if img["id"] in image_ids]
+        coco["annotations"] = [ann for ann in coco["annotations"]
+                               if ann["image_id"] in image_ids]
 
-    print(f"{out_file} images: {len(coco['images'])}")
-    return save_json(coco, out_file)
+    out_file = save_json(coco, out_file)
+    return Path(out_file).stem, len(coco["images"])
 
 
 class KeepPSamplesIn(object):
@@ -32,11 +33,13 @@ class KeepPSamplesIn(object):
         assert isinstance(p, (int, float)) and (p > 0)
         self.p_samples = int(p) if p > 1.0 else p
 
-    def split(self, coco_file, stratified=True, seed=1000):
+    def split(self, coco_file, num_groups=1, stratified=True, seed=1000):
         coco = load_json(coco_file)
         out_dir = Path(coco_file).parent
         out_dir = out_dir / "keep_p_samples"
         shutil.rmtree(out_dir, ignore_errors=True)
+
+        mapping = {cat["id"]: cat["name"] for cat in coco["categories"]}
 
         cache_imgs = defaultdict(set)
         cache_cats = defaultdict(set)
@@ -54,14 +57,16 @@ class KeepPSamplesIn(object):
         else:
             groups = {"none": [img["id"] for img in coco["images"]]}
 
-        print([(k, len(groups[k])) for k in sorted(groups.keys())])
-        for i in range(1, 6):
+        print([(mapping.get(k, "none"), len(groups[k]))
+               for k in sorted(groups.keys())])
+        for i in range(1, num_groups + 1):
             test_index, train_index = self._split(groups, seed * i)
 
             this_dir = make_dir(out_dir / f"{i:02d}")
-            save_dataset(coco, this_dir / "all.json", None)
-            save_dataset(coco, this_dir / "test.json", test_index)
-            save_dataset(coco, this_dir / "train.json", train_index)
+            print([this_dir,
+                   save_dataset(coco, this_dir / "all.json", None),
+                   save_dataset(coco, this_dir / "test.json", test_index),
+                   save_dataset(coco, this_dir / "train.json", train_index)])
         return str(out_dir)
 
     def _get_group(self, ranks):
@@ -107,8 +112,8 @@ class LeavePGroupsOut(object):
         out_dir = out_dir / "leave_p_groups"
         shutil.rmtree(out_dir, ignore_errors=True)
 
-        flags = np.zeros((len(coco["images"]), len(
-            coco["categories"])), dtype=np.int64)
+        flags = np.zeros((len(coco["images"]), len(coco["categories"])),
+                         dtype=np.int64)
         cat_index = {cat["id"]: i for i, cat in enumerate(coco["categories"])}
         img_index = {img["id"]: i for i, img in enumerate(coco["images"])}
         assert flags.shape[0] == len(img_index)
@@ -140,6 +145,7 @@ class LeavePGroupsOut(object):
         test_index = image_ids[test_index]
         train_index = image_ids[train_index]
 
-        save_dataset(coco, this_dir / "all.json", None)
-        save_dataset(coco, this_dir / "test.json", test_index)
-        save_dataset(coco, this_dir / "train.json", train_index)
+        print([this_dir,
+               save_dataset(coco, this_dir / "all.json", None),
+               save_dataset(coco, this_dir / "test.json", test_index),
+               save_dataset(coco, this_dir / "train.json", train_index)])

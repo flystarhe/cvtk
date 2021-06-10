@@ -31,11 +31,11 @@ out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
 time python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32 --all-imgs
-
-time python -m cvtk coco4kps 2000 ${out_dir}/coco.json --stratified
+time python -m cvtk coco4kps 1000 ${out_dir}/coco.json -n 1 --stratified
+time python -m cvtk coco4lpg 1 ${out_dir}/coco.json
 
 cp -u ${out_dir}/keep_p_samples/01/train.json ${out_dir}/coco_.json
-time python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json --stratified
+time python -m cvtk coco4kps 0.8 ${out_dir}/coco_.json -n 5 --stratified
 
 coco_dir=/workspace/notebooks/xxxx
 coco_file=keep_p_samples/01/train.json

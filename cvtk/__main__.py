@@ -56,6 +56,8 @@ def args_coco_keep_p_sample(args=None):
                         help="p samples to keep")
     parser.add_argument("coco_file", type=str,
                         help="coco file path")
+    parser.add_argument("-n", "--num_groups", type=int, default=1,
+                        help="specify num groups for dataset")
     parser.add_argument("--stratified", action="store_true",
                         help="stratified or not")
     parser.add_argument("--seed", type=int, default=1000,
