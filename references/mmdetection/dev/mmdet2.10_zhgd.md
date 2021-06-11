@@ -324,3 +324,33 @@ cfg_lr_config = dict(
     three_phase=False,
 )
 ```
+
+## app
+start app:
+```
+n=test
+t=flystarhe/mmdet:2.10-mmcv1.2-torch1.7-cuda10.2
+docker run --gpus all -d --network=host --ipc=host --name ${n} -v "$(pwd)"/${n}:/workspace ${t} notebook
+
+# docker exec -ti test bash
+unzip -q DEMO_ZHGD_MODEL.zip -d model_drain
+unzip -q DEMO_ZHGD_WEB.zip -d web_zhgd
+
+# CUDA_VISIBLE_DEVICES=GPU_ID python web.py PORT MODEL_PATH
+CUDA_VISIBLE_DEVICES=0 python /workspace/web_zhgd/web.py 7000 /workspace/model_drain
+```
+
+test app:
+```python
+import json
+import requests
+
+url = "http://localhost:7000/predict"
+json_str = json.dumps({"image": {"color": {"path": "/workspace/model_drain/test.jpg"}}, "info": {"product_id": "123xp"}})
+
+response = requests.post(url, data=dict(data=json_str))
+if 200 == response.status_code:
+    print(response.json())
+else:
+    print(response.text)
+```
