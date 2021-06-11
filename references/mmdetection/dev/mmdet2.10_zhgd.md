@@ -31,7 +31,7 @@ out_dir=${img_dir}_E32
 include='-i hiplot(*.csv)/coco(*.json)/dir(path/)'
 mapping='{"HARD":"__DEL"}'
 time python -m cvtk coco ${img_dir} -a ${ann_dir} -o ${out_dir} -m ${mapping} -e 32 --all-imgs
-time python -m cvtk coco4kps 800 ${out_dir}/coco.json -n 3 --stratified
+time python -m cvtk coco4kps 500 ${out_dir}/coco.json -n 5 --stratified
 time python -m cvtk coco4lpg 1 ${out_dir}/coco.json
 
 cp -u ${out_dir}/keep_p_samples/01/train.json ${out_dir}/coco_.json
@@ -92,7 +92,7 @@ cfg_experiment_path = './tmp/ipynbname'
 cfg_train_data_root = '/workspace/notebooks/xxxx'
 cfg_train_coco_file = 'keep_p_samples/01/train.json'
 cfg_val_data_root = '/workspace/notebooks/xxxx'
-cfg_val_coco_file = 'keep_p_samples/01/test.json'
+cfg_val_coco_file = 'keep_p_samples/01/val.json'
 cfg_test_data_root = '/workspace/notebooks/xxxx'
 cfg_test_coco_file = 'keep_p_samples/01/test.json'
 cfg_tmpl_path = '/usr/src/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
