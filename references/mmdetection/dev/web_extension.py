@@ -20,7 +20,7 @@ def analyze(result, detect_time, info, img):
     _res = copy.deepcopy(TMPL)
     try:
         if len(result) == 0:
-            out_final = dict(bbox=[0, 0, 1, 1], label="__OK", score=1.0)
+            out_final = dict(bbox=[0, 0, 1, 1], label="OK", score=1.0)
         else:
             out_final = max(result, key=lambda x: x["score"])
 
