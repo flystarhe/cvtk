@@ -35,6 +35,9 @@ def _filter(img_dir, ann_dir, include=None):
     img_list = [x for x in img_list if x.suffix in IMG_EXTENSIONS]
 
     if include is not None:
+        is_in, include = True, str(include)
+        if include.startswith("-"):
+            is_in, include = False, include[1:]
         include = Path(include)
         if include.is_dir():
             targets = [x for x in include.glob("**/*")]
@@ -46,7 +49,10 @@ def _filter(img_dir, ann_dir, include=None):
             raise NotImplementedError(f"Not Implemented: {include.name}")
 
         targets = set([Path(file_name).stem for file_name in targets])
-        img_list = [x for x in img_list if x.stem in targets]
+        if is_in:
+            img_list = [x for x in img_list if x.stem in targets]
+        else:
+            img_list = [x for x in img_list if x.stem not in targets]
 
     imgs = {x.stem: x for x in img_list}
 
