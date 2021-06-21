@@ -38,11 +38,12 @@ def test_one_epoch(model, data_loader, device, save_to=None):
     utils.mkdir(save_to)
     metric_logger = utils.MetricLogger(delimiter="  ")
     header = "Test:"
+    names = data_loader.dataset.names[1:]
     with torch.no_grad():
         for image, target in metric_logger.log_every(data_loader, 100, header):
             output = model(image.to(device))
 
-            display_image(image, output["out"], target, save_to)
+            display_image(image, output["out"], target, save_to, names)
 
     return save_to
 
