@@ -122,7 +122,7 @@ def make_imdb(img_dir, ann_dir, include=None):
 def copyfile(nparr, out_dir, out_path, del_shapes):
     for bbox in del_shapes:
         x, y, w, h = map(int, bbox)
-        nparr[y: y + h, x: x + w] = 0
+        cv.rectangle(nparr, (x, y), (x + w, y + h), (0, 0, 255), -1)
 
     cur_file = out_dir / "images" / out_path
     cur_file.parent.mkdir(parents=True, exist_ok=True)

@@ -110,9 +110,9 @@ class RandomCrop(object):
             dst_img = self._crop_and_paste(img, patch)
 
             cx, cy = self.width // 2, self.height // 2
-            x1, y1, x2, y2 = cx - 64, cy - 64, cx + 64, cy + 64
+            cv.circle(dst_img, (cx, cy), 32, (0, 0, 255), -1)
+            x1, y1, x2, y2 = cx - 32, cy - 32, cx + 32, cy + 32
 
-            dst_img[y1: y2, x1: x2] = (0, 0, 255)
             # set the man-made object category in 1st group
             dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)
             dst_labels = np.array([0], dtype=np.int64)
@@ -138,7 +138,7 @@ class RandomCrop(object):
         dst_bboxes = self._clip_bboxes(bboxes.copy(), patch)
         dst_mask, drop_mask = _check_bboxes(bboxes, dst_bboxes, self.nonignore)
         for x1, y1, x2, y2 in dst_bboxes[drop_mask].astype(np.int64).tolist():
-            dst_img[y1: y2, x1: x2] = 0
+            cv.rectangle(dst_img, (x1, y1), (x2, y2), (0, 0, 255), -1)
         dst_bboxes = dst_bboxes[dst_mask]
         dst_labels = labels[dst_mask]
 
