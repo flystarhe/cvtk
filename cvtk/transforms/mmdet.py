@@ -110,8 +110,8 @@ class RandomCrop(object):
             dst_img = self._crop_and_paste(img, patch)
 
             cx, cy = self.width // 2, self.height // 2
-            cv.circle(dst_img, (cx, cy), 32, (0, 0, 255), -1)
-            x1, y1, x2, y2 = cx - 32, cy - 32, cx + 32, cy + 32
+            cv.circle(dst_img, (cx, cy), 48, (0, 0, 255), -1)
+            x1, y1, x2, y2 = cx - 48, cy - 48, cx + 48, cy + 48
 
             # set the man-made object category in 1st group
             dst_bboxes = np.array([[x1, y1, x2, y2]], dtype=np.float32)
