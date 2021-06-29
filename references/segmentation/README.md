@@ -21,7 +21,7 @@ docker run --gpus all -d -p 7000:9000 --ipc=host --name ${n} -v "$(pwd)"/${n}:/w
 Assume `git clone https://github.com/flystarhe/cvtk.git /workspace/cvtk`. you must modify the following flags:
 
 * `--nproc_per_node=<number_of_gpus_available>`
-* models: `fcn_resnet50,deeplabv3_resnet50,lraspp_mobilenet_v3_large`
+* models: `fcn_resnet50,deeplabv3_resnet50,deeplabv3_mobilenet_v3_large,lraspp_mobilenet_v3_large`
 
 ```jupyter
 import os
