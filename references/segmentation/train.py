@@ -169,6 +169,7 @@ def main(args):
         confmat = evaluate(model, transform, data_loader_test,
                            device=device, num_classes=num_classes)
         print(confmat)
+        print(confmat.mat)
         utils.save_on_master(
             {
                 "model": model_without_ddp.state_dict(),
