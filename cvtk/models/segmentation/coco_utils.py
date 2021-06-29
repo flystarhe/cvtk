@@ -109,13 +109,13 @@ class ToyDataset:
             else:
                 x1 = max(0, (x1 + x2 - self._crop_size) // 2)
             _shift = np.random.randint(0, 32) - 16
-            x1 = x1 + _shift
+            x1 = max(0, x1 + _shift)
             if y2 - y1 < self._crop_size:
                 y1 = max(0, np.random.randint(y2 - self._crop_size, y1))
             else:
                 y1 = max(0, (y1 + y2 - self._crop_size) // 2)
             _shift = np.random.randint(0, 32) - 16
-            y1 = y1 + _shift
+            y1 = max(0, y1 + _shift)
             x2, y2 = x1 + self._crop_size, y1 + self._crop_size
 
             if x2 > img_w:
