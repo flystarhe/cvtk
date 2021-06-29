@@ -132,7 +132,7 @@ class ToyDataset:
 
             dst_mask, drop_mask = _check_bboxes(old_bboxes, bboxes, self._safe)
             for x1, y1, x2, y2 in bboxes[drop_mask].astype(np.int64).tolist():
-                cv.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), -1)
+                cv.rectangle(image, (x1, y1), (x2, y2), (255, 0, 0), -1)
 
             bboxes = bboxes[dst_mask].tolist()
             labels = labels[dst_mask].tolist()
