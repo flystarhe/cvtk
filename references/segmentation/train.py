@@ -77,9 +77,9 @@ def main(args):
 
     device = torch.device(args.device)
 
-    dataset = coco_utils.ToyDataset(args.data_path, args.train, single_cls=args.single_cls,
+    dataset = coco_utils.ToyDataset(args.data_path, args.train, max_size=args.max_size, single_cls=args.single_cls,
                                     crop_size=args.crop_size, phase="train")
-    dataset_test = coco_utils.ToyDataset(args.data_path, args.val, single_cls=args.single_cls,
+    dataset_test = coco_utils.ToyDataset(args.data_path, args.val, max_size=args.max_size, single_cls=args.single_cls,
                                          crop_size=args.crop_size, phase="val")
 
     if args.distributed:
@@ -198,6 +198,8 @@ def parse_args():
                         help="subset for val")
     parser.add_argument("--single-cls", action="store_true",
                         help="single")
+    parser.add_argument("--max-size", default=512, type=int,
+                        help="smallest max size")
     parser.add_argument("--crop-size", default=480, type=int,
                         help="train phase")
 

@@ -35,7 +35,7 @@ def _check_bboxes(src_bboxes, dst_bboxes, nonignore):
 
 class ToyDataset:
 
-    def __init__(self, data_root, coco_file, single_cls=True, crop_size=480, phase="train"):
+    def __init__(self, data_root, coco_file, single_cls=True, max_size=512, crop_size=480, phase="train"):
         nonignore = crop_size * crop_size * 0.5
         self._ann_file = Path(data_root) / coco_file
         self._img_prefix = Path(data_root)
@@ -44,16 +44,21 @@ class ToyDataset:
         self._safe = nonignore
         self._phase = phase
 
+        if max_size is None:
+            self._max_size = crop_size + 32
+        else:
+            self._max_size = max_size
+
         if phase == "train":
             self.transforms = A.Compose([
-                A.SmallestMaxSize(max_size=crop_size + 32,
+                A.SmallestMaxSize(max_size=self._max_size,
                                   interpolation=cv.INTER_LINEAR, p=1.0),
                 A.RandomBrightnessContrast(p=0.2),
                 A.Flip(p=0.5),
             ], bbox_params=A.BboxParams(format="pascal_voc", label_fields=["labels"]))
         else:
             self.transforms = A.Compose([
-                A.SmallestMaxSize(max_size=crop_size + 32,
+                A.SmallestMaxSize(max_size=self._max_size,
                                   interpolation=cv.INTER_LINEAR, p=1.0),
             ], bbox_params=A.BboxParams(format="pascal_voc", label_fields=["labels"]))
 
@@ -163,7 +168,7 @@ class ToyDataset:
         image = F.to_tensor(image)  # \in [0, 1]
         image = F.normalize(image, self.mean, self.std, True)
         target = dict(id=image_id, bboxes=bboxes, labels=labels,
-                      img_shape=list(image.size()))
+                      img_shape=list(image.size()), file_name=file_name)
         return image, target
 
     def __len__(self):

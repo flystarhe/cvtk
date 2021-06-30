@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import cv2 as cv
 import numpy as np
@@ -8,6 +8,12 @@ from torch.nn import functional as F
 
 DEFAULT_COLORS = ("red", "blue", "yellow", "magenta", "green",
                   "indigo", "darkorange", "cyan", "pink", "yellowgreen")
+
+
+def get_filename(save_to, file_name):
+    out_file = Path(save_to) / Path(file_name)
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    return str(out_file)
 
 
 def draw_legend(npimg, names=None, colors=None):
@@ -52,7 +58,7 @@ def display_image(image, output, target, save_to, names=None):
     image, output, target = image[0], output[0], target[0]
 
     if target is None:
-        target = dict(id=0, bboxes=[], labels=[])
+        target = dict(bboxes=[], labels=[], file_name="none/0.jpg")
 
     if names is not None:
         N_DEFAULT_COLORS = len(DEFAULT_COLORS)
@@ -86,12 +92,11 @@ def display_image(image, output, target, save_to, names=None):
     h, w, _ = image.shape
     output = cv.resize(output, (w, h), interpolation=cv.INTER_NEAREST)
 
-    image_id = target["id"]
     bboxes = target["bboxes"]
     labels = target["labels"]
     image = draw_bbox(image, bboxes, labels)
     output = draw_bbox(output, bboxes, labels)
     img = np.concatenate((image, output), axis=1)
-    filename = os.path.join(save_to, f"{image_id:04d}.jpg")
+    filename = get_filename(save_to, target["file_name"])
     cv.imwrite(filename, cv.cvtColor(img, cv.COLOR_RGB2BGR))
     return filename
