@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 if sys.path[0] in ("", os.getcwd()):
     sys.path.pop(0)
 
-from cvtk.utils.tools.folder import split_folder
+from cvtk.tools.folder import split_folder
 
 
 def args_split_folder(args=None):
@@ -54,7 +54,7 @@ def _main(args=None):
         print(f"kwargs: {kw}")
         return split_folder(**kw)
     elif task == "-h" or task == "--help":
-        print("usage: python -m cvtk.utils.tools command ...")
+        print("usage: python -m cvtk.tools command ...")
     else:
         print(f"unimplemented command: {task}")
 
@@ -62,9 +62,9 @@ def _main(args=None):
 
 
 # develop:
-# python cvtk/utils/tools ...
+# python cvtk/tools ...
 # runtime:
-# python -m cvtk.utils.tools ...
+# python -m cvtk.tools ...
 if __name__ == "__main__":
     print(_main())
     sys.exit(0)
