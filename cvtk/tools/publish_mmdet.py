@@ -82,7 +82,7 @@ def process_checkpoint(indir, outdir=None, suffixes=None):
 
     dst = str(outdir)
     for src in other_files(indir, suffixes[1:]):
-        subprocess.Popen(["cp", src, dst])
+        shutil.copy(src, dst)
 
     return "\n".join([str(f) for f in outdir.glob("*.*")])
 
