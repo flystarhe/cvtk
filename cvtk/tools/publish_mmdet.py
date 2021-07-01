@@ -59,6 +59,7 @@ def process_checkpoint(indir, outdir=None, suffixes=None):
 
     outdir = Path(outdir)
     shutil.rmtree(outdir, ignore_errors=True)
+    outdir.mkdir(parents=True, exist_ok=True)
 
     if suffixes is None:
         suffixes = ".pth,.py,.html".split(",")
