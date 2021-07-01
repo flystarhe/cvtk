@@ -33,8 +33,9 @@ def draw_legend(npimg, names=None, colors=None):
               for c in colors]
 
     for i, (color, name) in enumerate(zip(colors, names)):
-        x1, y1, x2, y2 = 20, 20 + i * 40, 50, 50 + i * 40
-        cv.rectangle(npimg, (x1, y1), (x2, y2), color, thickness=2)
+        x1, y1 = 20, 20 + i * 40
+        x2, y2 = 20 + 30, 20 + i * 40 + 30
+        cv.rectangle(npimg, (x1, y1), (x2, y2), color, -1)
         cv.putText(npimg, f"{name}", (x2 + 20, y2),
                    cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255))
 
