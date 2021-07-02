@@ -5,7 +5,7 @@ from torch import Tensor, nn
 from torch.nn import functional as F
 
 
-def _mask_top_by_full(roi: Tensor, k: int = 1):
+def _mask_top_by_full(roi: Tensor, k: int = 1, eps: float = 1e-2):
     """Masked best k sub_roi/pixel.
 
     Args:
@@ -13,10 +13,10 @@ def _mask_top_by_full(roi: Tensor, k: int = 1):
     """
     flattened = torch.flatten(roi, start_dim=0, end_dim=-1)
     val = torch.topk(flattened, k, dim=-1)[0][-1]
-    return torch.gt(roi, val * 0.95)
+    return torch.gt(roi, val - eps)
 
 
-def _mask_top_by_grid(roi: Tensor, k: int = 1):
+def _mask_top_by_grid(roi: Tensor, k: int = 1, eps: float = 1e-2):
     """Masked best k sub_roi/pixel.
 
     Args:
@@ -31,39 +31,39 @@ def _mask_top_by_grid(roi: Tensor, k: int = 1):
         flattened = torch.flatten(output)
         val = torch.topk(flattened, max(output.shape), dim=-1)[0][-1]
         output = F.interpolate(output, size=roi.shape, align_corners=False)
-        return torch.gt(output, val * 0.95)
+        return torch.gt(output, val - eps)
 
-    return _mask_top_by_full(roi, k=max(roi.shape))
+    return _mask_top_by_full(roi, k=max(roi.shape), eps=eps)
 
 
-def _mask_top_by_line_h(roi: Tensor, k: int = 1):
+def _mask_top_by_line_h(roi: Tensor, k: int = 1, eps: float = 1e-2):
     """Masked best k sub_roi/pixel.
 
     Args:
         roi (Tensor[H, W]): input tensor.
     """
     mat = torch.topk(roi, k, dim=0)[0][-1:, :]
-    return torch.gt(roi, mat * 0.95)
+    return torch.gt(roi, mat - eps)
 
 
-def _mask_top_by_line_w(roi: Tensor, k: int = 1):
+def _mask_top_by_line_w(roi: Tensor, k: int = 1, eps: float = 1e-2):
     """Masked best k sub_roi/pixel.
 
     Args:
         roi (Tensor[H, W]): input tensor.
     """
     mat = torch.topk(roi, k, dim=1)[0][:, -1:]
-    return torch.gt(roi, mat * 0.95)
+    return torch.gt(roi, mat - eps)
 
 
-def _mask_top_by_line(roi: Tensor, k: int = 1):
+def _mask_top_by_line(roi: Tensor, k: int = 1, eps: float = 1e-2):
     """Masked best k sub_roi/pixel.
 
     Args:
         roi (Tensor[H, W]): input tensor.
     """
-    a = _mask_top_by_line_h(roi, k=k)
-    b = _mask_top_by_line_w(roi, k=k)
+    a = _mask_top_by_line_h(roi, k=k, eps=eps)
+    b = _mask_top_by_line_w(roi, k=k, eps=eps)
     return a + b
 
 

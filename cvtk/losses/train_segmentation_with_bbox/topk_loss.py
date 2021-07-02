@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from ._utils import _balance, _mask_top_by_full, _rescale, _sorted_and_cat
 
 
-def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoid=False):
+def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoid=False, eps=1e-2):
     """Assume `cross_entropy(ignore_index=-100)`.
 
     Args:
@@ -31,7 +31,7 @@ def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoi
 
         sub_target = torch.full_like(roi, -100, dtype=torch.int64)
         k = topk if topk is not None else max(roi.shape)
-        selected = _mask_top_by_full(roi, k)
+        selected = _mask_top_by_full(roi, k, eps)
         sub_target[selected] = label
 
         target[y1:y2, x1:x2] = sub_target
@@ -42,26 +42,26 @@ def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoi
     return target
 
 
-def transform(pred, target, topk=3, balance=True, use_sigmoid=False):
+def transform(pred, target, topk=3, balance=True, use_sigmoid=False, eps=1e-2):
     # `pred (Tensor[N, C, H, W])` and `target (List[Dict])`.
     s = pred.shape[-1] / target[0]["img_shape"][-1]
     pred = pred.detach()
 
     _target = []
     for i in range(pred.shape[0]):
-        _target.append(make_target(
-            s, pred[i], target[i]["bboxes"], target[i]["labels"], topk, balance, use_sigmoid))
+        _target.append(make_target(s, pred[i], target[i]["bboxes"], target[i]["labels"],
+                                   topk, balance, use_sigmoid, eps))
     return torch.stack(_target, 0)
 
 
-def criterion(inputs, target, topk=3, balance=True, use_sigmoid=False):
+def criterion(inputs, target, topk=3, balance=True, use_sigmoid=False, eps=1e-2):
     """
     Args:
         inputs (OrderedDict): required `out`, optional `aux`.
         target (List[Dict]): required `bboxes`, `img_shape`, `labels`.
     """
     _pred = inputs["out"]
-    _target = transform(_pred, target, topk, balance, use_sigmoid)
+    _target = transform(_pred, target, topk, balance, use_sigmoid, eps)
     if use_sigmoid:
         raise NotImplementedError("Not Implemented ...")
     else:
@@ -69,7 +69,7 @@ def criterion(inputs, target, topk=3, balance=True, use_sigmoid=False):
 
     if "aux" in inputs:
         _pred = inputs["aux"]
-        _target = transform(_pred, target, topk, balance, use_sigmoid)
+        _target = transform(_pred, target, topk, balance, use_sigmoid, eps)
         if use_sigmoid:
             raise NotImplementedError("Not Implemented ...")
         else:
