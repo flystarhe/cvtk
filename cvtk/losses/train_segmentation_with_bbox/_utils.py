@@ -30,8 +30,8 @@ def _mask_top_by_grid(roi: Tensor, k: int = 1, eps: float = 1e-2):
         output = pool(roi[None, None])
         flattened = torch.flatten(output)
         val = torch.topk(flattened, max(output.shape), dim=-1)[0][-1]
-        output = F.interpolate(output, size=roi.shape, align_corners=False)
-        return torch.gt(output, val - eps)
+        # output = F.interpolate(output, size=roi.shape, align_corners=False)
+        return torch.gt(roi, val - eps)
 
     return _mask_top_by_full(roi, k=max(roi.shape), eps=eps)
 
