@@ -150,6 +150,9 @@ def make_dataset(img_dir, ann_dir=None, out_dir=None, include=None, mapping=None
     if mapping is not None:
         labels = set([_trans(mapping, l) for l in labels])
 
+    if not labels:
+        labels = set(["_FG"])
+
     labels = sorted(labels - DEL_LABELS)
     print(f"\nlabels: {len(labels)}\n{labels}\n")
     cat_index = {l: i for i, l in enumerate(labels)}
