@@ -30,7 +30,7 @@ def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoi
             continue
 
         sub_target = torch.full_like(roi, -100, dtype=torch.int64)
-        k = topk if topk is not None else 5  # grid of 5x5
+        k = topk or 5  # the default value is grid of 5x5
         selected = _mask_top_by_grid(roi, k, eps)
         sub_target[selected] = label
 

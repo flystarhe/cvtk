@@ -30,7 +30,7 @@ def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoi
             continue
 
         sub_target = torch.full_like(roi, -100, dtype=torch.int64)
-        k = topk if topk is not None else 1  # only 1st
+        k = topk or 1  # the default value is only 1st
         selected = _mask_top_by_line(roi, k, eps)
         sub_target[selected] = label
 

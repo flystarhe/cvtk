@@ -30,7 +30,7 @@ def make_target(s, feats, bboxes, labels=None, topk=3, balance=False, use_sigmoi
             continue
 
         sub_target = torch.full_like(roi, -100, dtype=torch.int64)
-        k = topk or sum(roi.shape)  # 7 or max(roi.shape)
+        k = topk or max(roi.shape)  # is the largest edge
         selected = _mask_top_by_full(roi, k, eps)
         sub_target[selected] = label
 
