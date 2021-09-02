@@ -5,7 +5,8 @@ lxml==4.6.2
 networkx
 numpy
 #opencv-contrib-python-headless>=4.5.1
-opencv-python-headless>=4.5.1
+#opencv-python-headless>=4.5.1
+opencv-python>=4.5.3
 pandas
 pillow>=8.1.2
 requests
