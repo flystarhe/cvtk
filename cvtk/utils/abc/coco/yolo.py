@@ -37,7 +37,7 @@ def yolo_from_coco(coco_dir, json_dir=None):
             dst_path = out_dir / "images" / src_path.name
             if not dst_path.exists():
                 shutil.copyfile(src_path, dst_path)
-            image_path_list.append(dst_path.relative_to(out_dir).as_posix())
+            image_path_list.append(f"./images/{src_path.name}")
         image_path_list = sorted(set(image_path_list))
 
         with open(out_dir / "names.txt", "a") as file:
