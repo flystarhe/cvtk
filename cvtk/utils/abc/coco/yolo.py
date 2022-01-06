@@ -7,8 +7,9 @@ from cvtk.io import load_json
 from tqdm import tqdm
 
 
-def yolo_from_coco(coco_dir, json_dir):
+def yolo_from_coco(coco_dir, json_dir=None):
     coco_dir = Path(coco_dir)
+
     if json_dir is None:
         json_dir = coco_dir
     else:
