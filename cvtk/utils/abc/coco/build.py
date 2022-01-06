@@ -5,7 +5,7 @@ from xml.etree import ElementTree
 import cv2 as cv
 import numpy as np
 import pandas as pd
-from cvtk.io import load_json, save_json
+from cvtk.io import load_json, load_txt, save_json
 from cvtk.utils.abc import nms
 from lxml import etree
 
@@ -41,6 +41,8 @@ def _filter(img_dir, ann_dir, include=None):
         include = Path(include)
         if include.is_dir():
             targets = [x for x in include.glob("**/*")]
+        elif include.suffix == ".txt":  # from yolov5
+            targets = load_txt(include)
         elif include.suffix == ".csv":  # from hiplot
             targets = pd.read_csv(include)["file_name"].tolist()
         elif include.suffix == ".json":  # from coco dataset
@@ -48,7 +50,8 @@ def _filter(img_dir, ann_dir, include=None):
         else:
             raise NotImplementedError(f"Not Implemented: {include.name}")
 
-        targets = set([Path(file_name).stem for file_name in targets])
+        targets = set([Path(file_name).stem for file_name in targets
+                       if str(file_name).strip()])
         if is_in:
             img_list = [x for x in img_list if x.stem in targets]
         else:

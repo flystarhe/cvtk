@@ -81,3 +81,16 @@ def save_csv(lines, csv_file):
     with open(csv_file, "w") as f:
         f.write("\n".join(lines))
     return csv_file
+
+
+def load_txt(txt_file):
+    with open(txt_file, "r") as f:
+        lines = f.readlines()
+    return lines
+
+
+def save_txt(lines, txt_file):
+    make_dir(Path(txt_file).parent)
+    with open(txt_file, "w") as f:
+        f.write("\n".join(lines))
+    return txt_file
