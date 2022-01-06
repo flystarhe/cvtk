@@ -39,6 +39,7 @@ def yolo_from_coco(coco_dir, json_dir=None):
                 shutil.copyfile(src_path, dst_path)
             image_path_list.append(f"./images/{src_path.name}")
         image_path_list = sorted(set(image_path_list))
+        n_images = len(image_path_list)
 
         with open(out_dir / "names.txt", "a") as file:
             file.write("{}: {}\n".format(json_file.stem, names))
@@ -46,7 +47,17 @@ def yolo_from_coco(coco_dir, json_dir=None):
         with open(out_dir / (json_file.stem + ".txt"), "w") as file:
             file.write("\n".join(image_path_list))
 
-        for x in tqdm(data["annotations"], desc="%s (%g)" % (json_file.stem, len(image_path_list))):
+        pos = n_images // 5
+        np.random.seed(pos * 100)
+        np.random.shuffle(image_path_list)
+
+        with open(out_dir / (json_file.stem + "_val.txt"), "w") as file:
+            file.write("\n".join(image_path_list[:pos]))
+
+        with open(out_dir / (json_file.stem + "_train.txt"), "w") as file:
+            file.write("\n".join(image_path_list[pos:]))
+
+        for x in tqdm(data["annotations"], desc="%s (%g)" % (json_file.stem, n_images)):
             if x.get("iscrowd"):
                 continue
 
