@@ -84,7 +84,7 @@ def args_coco_to_yolo(args=None):
     parser = ArgumentParser(description="yolo from coco")
     parser.add_argument("coco_dir", type=str,
                         help="dataset root dir")
-    parser.add_argument("json_dir", type=str,
+    parser.add_argument("json_dir", type=str, default=None,
                         help="coco file dir")
     args = parser.parse_args(args=args)
 

@@ -9,7 +9,11 @@ from tqdm import tqdm
 
 def yolo_from_coco(coco_dir, json_dir):
     coco_dir = Path(coco_dir)
-    json_dir = coco_dir / json_dir
+    if json_dir is None:
+        json_dir = coco_dir
+    else:
+        json_dir = coco_dir / json_dir
+
     out_dir = coco_dir.name + "_yolo"
     out_dir = coco_dir.parent / out_dir
     shutil.rmtree(out_dir, ignore_errors=True)
